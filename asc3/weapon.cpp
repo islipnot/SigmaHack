@@ -10,6 +10,28 @@ UINT* player_count;
 player_entity*** player_list_ptr;
 player_entity* local_player;
 
+static float GetAngleDistance(player_entity* self, float final_yaw, float final_pitch)
+{
+	float yaw_dst = std::abs(self->yaw - final_yaw);
+	float pitch_dst = std::abs(self->pitch - final_pitch);
+
+	if (yaw_dst > 180.0f) 
+		yaw_dst = std::abs(self->yaw - (360.0f - yaw_dst));
+
+	return sqrtf(pow(yaw_dst, 2) + pow(pitch_dst, 2));
+}
+
+static void GetAngleInfo(float& distance, float& yaw, float& pitch, player_entity* self, player_entity* target)
+{
+	const float absX = self->x - target->x;
+	const float absY = self->y - target->y;
+	const float absZ = target->z - self->z;
+	distance = sqrtf(pow(absX, 2) + pow(absY, 2));
+	pitch = (float)(atan2f(absZ, distance) * (180.0f / M_PI));
+	yaw = (float)(atan2f(absY, absX) * (180.0f / M_PI) - 90.0f);
+	if (yaw < 0.0f) yaw += 360.0f;
+}
+
 void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 {
 	const auto player_list = *player_list_ptr;
@@ -26,29 +48,20 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 	{
 		if (player_list[x]->health > 100 || (player_list[x]->team == local_player->team && !cfg.target_team)) continue;
 
-		float absX = local_player->x - player_list[x]->x;
-		float absY = local_player->y - player_list[x]->y;
-		float absZ = player_list[x]->z - local_player->z;
-		float distance = sqrtf((absX * absX) + (absY * absY));
+		float angle_dst, distance, new_yaw, new_pitch;
+		GetAngleInfo(distance, new_yaw, new_pitch, local_player, player_list[x]);
+		angle_dst = GetAngleDistance(local_player, new_yaw, new_pitch);
 
-		float req_yaw   = (float)(atan2f(absY, absX) * (180 / M_PI) - 90);
-		float req_pitch = (float)(atan2f(absZ, distance) * (180 / M_PI));
-
-		if (req_yaw < 0.0f) req_yaw += 360.0f;
+		if (angle_dst > cfg.aimbot_fov)
+			continue;
 
 		switch (cfg.target_mode)
 		{
 		case closest_fov:
 		{
-			float yaw_dst   = std::abs(local_player->yaw - req_yaw);
-			float pitch_dst = std::abs(local_player->pitch - req_pitch);
-
-			if (yaw_dst > 180.0f) yaw_dst = std::abs(local_player->yaw - (360.0f - yaw_dst));
-
-			const float total_dst = yaw_dst + pitch_dst;
-			if (total_dst <= cfg.aimbot_fov && total_dst < closest_aim)
+			if (angle_dst < closest_aim)
 			{
-				closest_aim = total_dst;
+				closest_aim = angle_dst;
 				break;
 			}
 
@@ -66,8 +79,18 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 			continue;
 		}
 
-		case danger: // NEED TO ADD
+		case danger:
 		{
+			float targ_new_yaw, targ_new_pitch;
+			GetAngleInfo(distance, targ_new_yaw, targ_new_pitch, player_list[x], local_player);
+			angle_dst = GetAngleDistance(player_list[x], targ_new_yaw, targ_new_pitch);
+
+			if (angle_dst < most_danger)
+			{
+				most_danger = angle_dst;
+				break;
+			}
+
 			continue;
 		}
 
@@ -83,13 +106,13 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 		}
 		}
 
-		final_yaw   = req_yaw;
-		final_pitch = req_pitch;
+		final_yaw = new_yaw;
+		final_pitch = new_pitch;
 	}
 	
 	if (final_yaw)
 	{
-		local_player->yaw   = final_yaw;
+		local_player->yaw = final_yaw;
 		local_player->pitch = final_pitch;
 	}
 }
