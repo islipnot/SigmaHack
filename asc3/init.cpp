@@ -8,7 +8,6 @@
 #include "entities.hpp"
 #include "pScanning.hpp"
 
-extern menu_cfg cfg;
 extern WndProc_sig og_wndproc;
 extern PollEvents_sig PollEvents;
 extern SwapWindow_sig SwapWindow;

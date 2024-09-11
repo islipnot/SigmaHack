@@ -149,6 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="gui_helpers.hpp" />
     <ClInclude Include="weapon.hpp" />
     <ClInclude Include="entities.hpp" />
     <ClInclude Include="gui.hpp" />
@@ -255,6 +256,7 @@
     <ClInclude Include="pScanning.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="gui_helpers.cpp" />
     <ClCompile Include="weapon.cpp" />
     <ClCompile Include="dllmain.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>

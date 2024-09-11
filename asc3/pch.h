@@ -1,12 +1,14 @@
-#ifndef PCH_H
-#define PCH_H
+#pragma once
 
 #define WIN32_LEAN_AND_MEAN
 
 #include <windows.h>
 #include <Psapi.h>
 
-#include <iostream> // for console debugging
+#ifdef _DEBUG
+	#include <iostream>
+#endif
+
 #include <string>
 
 #include <SDL.h>
@@ -14,5 +16,3 @@
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl2.h>
-
-#endif

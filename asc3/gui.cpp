@@ -4,10 +4,9 @@
 #include "weapon.hpp"
 #include "entities.hpp"
 #include "pScanning.hpp"
+#include "gui_helpers.hpp"
 
 SwapWindow_sig SwapWindow;
-
-extern menu_cfg cfg;
 
 static inline void RenderFrame()
 {
@@ -24,94 +23,10 @@ static void SetupFrame()
 	ImGui::NewFrame();
 	ImGui::SetNextWindowSize({ 600, 450 }, ImGuiCond_FirstUseEver);
 
-	constexpr ImVec4 dark_purple = { 0.2156862f, 0.0117647f, 0.3686274f, 0.85f };
-	ImGui::PushStyleColor(ImGuiCol_Border, dark_purple);
+	ImGui::PushStyleColor(ImGuiCol_Border, GetColor(menu_border));
 
 	ImGui::Begin("sigmahack.cc", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings);
 	ImGui::PopStyleColor();
-}
-
-static bool CheckboxEx(const char* const label, bool* const var)
-{
-	constexpr ImVec4 dark_purple  = { 0.2156862f, 0.0117647f, 0.3686274f, 0.75f };
-	constexpr ImVec4 light_purple = { 0.3156862f, 0.0217647f, 0.4686274f, 0.75f };
-	constexpr ImVec4 light_grey   = { 0.1562745f, 0.1562745f, 0.1562745f, 1.0f };
-
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,   { 4.0f, 6.0f });
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding,  { 3.0f, 3.0f });
-	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding,   1.5f);
-	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
-
-	const bool v_status = *var;
-
-	if (v_status)
-	{
-		ImGui::PushStyleColor(ImGuiCol_FrameBg,        dark_purple);
-		ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, light_purple);
-		ImGui::PushStyleColor(ImGuiCol_FrameBgActive,  light_purple);
-	}
-	else ImGui::PushStyleColor(ImGuiCol_Border, light_grey);
-
-	const bool status = ImGui::Checkbox(label, var);
-
-	ImGui::PopStyleColor(v_status ? 3 : 1);
-	ImGui::PopStyleVar(4);
-
-	return status;
-}
-
-static int SliderFloatEx(const char* label, float* var, const float min, const float max)
-{
-	static auto style = ImGui::GetStyle();
-
-	const ImVec2 FramePadding = { style.FramePadding.x, style.FramePadding.y * 0.60f };
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, FramePadding);
-	ImGui::SetNextItemWidth(250.0f);
-
-	const int status = ImGui::SliderFloat(label, var, min, max);
-	ImGui::PopStyleVar();
-
-	return status;
-}
-
-static bool ComboEx(const char* label, int* selection, const char* items[], int item_count)
-{
-	ImGui::SameLine();
-
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 5.0f, 4.0f });
-	ImGui::SetNextItemWidth(100.0f);
-
-	const bool status = ImGui::Combo(label, selection, items, item_count);
-
-	ImGui::PopStyleVar();
-
-	return status;
-}
-
-static bool ResetButton(const int item_id)
-{
-	ImGui::SameLine();
-
-	static const float padding_x = (ImGui::CalcTextSize("reset").x / 2) * 0.80f;
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { padding_x, 3.0f });
-	ImGui::PushID(item_id);
-
-	const bool status = ImGui::Button("reset");
-	ImGui::PopStyleVar();
-	ImGui::PopID();
-
-	return status;
-}
-
-static void ToolTip(const char* const text)
-{
-	ImGui::SameLine();
-
-	constexpr ImVec4 LightPurple = { 0.8156862f, 0.5217647f, 0.9686274f, 0.75f };
-
-	ImGui::TextColored(LightPurple, "?");
-
-	if (ImGui::IsItemHovered()) ImGui::SetTooltip(text);
 }
 
 void DrawMenu(SDL_Window* window)
@@ -252,6 +167,16 @@ void DrawMenu(SDL_Window* window)
 			if (ImGui::BeginTabItem("Theme"))
 			{
 				CheckboxEx("Block game input", &cfg.block_input);
+
+				if (ColorEditEx("Menu accent", cfg.menu_accent))
+				{
+					static auto& colors = ImGui::GetStyle().Colors;
+
+					colors[ImGuiCol_TabActive]        = GetColor(light_purple);
+					colors[ImGuiCol_TabHovered]       = GetColor(light_purpleA);
+					colors[ImGuiCol_SliderGrab]       = GetColor(dark_purple);
+					colors[ImGuiCol_SliderGrabActive] = GetColor(light_purple);
+				}
 
 				ImGui::EndTabItem();
 			}

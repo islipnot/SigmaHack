@@ -9,9 +9,8 @@
 UINT* player_count;
 player_entity*** player_list_ptr;
 player_entity* local_player;
-extern menu_cfg cfg;
 
-void aimbot()
+void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 {
 	const auto player_list = *player_list_ptr;
 
@@ -34,7 +33,7 @@ void aimbot()
 
 		switch (cfg.target_mode)
 		{
-		case closest_fov:
+		case closest_fov: // NEED TO ADD
 		{
 			continue;
 		}
@@ -50,7 +49,7 @@ void aimbot()
 			continue;
 		}
 
-		case danger:
+		case danger: // NEED TO ADD
 		{
 			continue;
 		}

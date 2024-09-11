@@ -34,7 +34,6 @@ struct menu_cfg
 
 	// Exploits
 	bool force_auto = false;
-	
 
 	// Misc
 	bool adj_fov  = false;
@@ -46,4 +45,7 @@ struct menu_cfg
 	// Theme
 	bool menu = true;
 	bool block_input = true;
+	float menu_accent[4] = { 0.2156862f, 0.0117647f, 0.3686274f, 0.85f }; // dark purple
 };
+
+extern menu_cfg cfg;
