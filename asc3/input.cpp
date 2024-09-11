@@ -9,7 +9,7 @@ int HandleEvent(SDL_Event* sdl_event)
 {
 	const int status = PollEvents(sdl_event);
 
-	if (cfg.menu)
+	if (cfg.menu_open)
 	{
 		ImGui_ImplSDL2_ProcessEvent(sdl_event);
 		if (cfg.block_input) return 0;
@@ -22,11 +22,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_KEYDOWN && wParam == VK_INSERT)
 	{
-		SDL_SetRelativeMouseMode((SDL_bool)cfg.menu);
+		SDL_SetRelativeMouseMode((SDL_bool)cfg.menu_open);
 
-		cfg.menu = !cfg.menu;
-		ImGui::GetIO().WantCaptureMouse = cfg.menu;
-		ImGui::GetIO().WantCaptureKeyboard = cfg.menu;
+		cfg.menu_open = !cfg.menu_open;
+		ImGui::GetIO().WantCaptureMouse = cfg.menu_open;
+		ImGui::GetIO().WantCaptureKeyboard = cfg.menu_open;
 
 		return true;
 	} 

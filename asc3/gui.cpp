@@ -31,7 +31,7 @@ static void SetupFrame()
 
 void DrawMenu(SDL_Window* window)
 {
-	if (cfg.menu)
+	if (cfg.menu_open)
 	{
 		SetupFrame();
 
@@ -47,7 +47,10 @@ void DrawMenu(SDL_Window* window)
 					ComboEx("##MODES", &cfg.target_mode, modes, IM_ARRAYSIZE(modes));
 
 					SliderFloatEx("##SMOOTHING", &cfg.smoothing, 0.0f, 100.0f);
+					SliderFloatEx("##AIMBOT_FOV", &cfg.aimbot_fov, 0.5f, 360.0f);
 				}
+
+				CheckboxEx("Target on shoot", &cfg.target_fire);
 
 				CheckboxEx("Target teammates", &cfg.target_team);
 
@@ -63,25 +66,9 @@ void DrawMenu(SDL_Window* window)
 					{
 						switch (recoil_mode)
 						{
-
-						case visual:   
-						{ 
-							cfg.vis_recoil = recoil; 
-							cfg.vis_recoil_mlt = recoil / 1000.0f;
-							break;
-						}
-
-						case physical: 
-						{ 
-							cfg.phys_recoil = recoil; 
-							break; 
-						}
-
-						default: 
-						{ 
-							cfg.vis_recoil = cfg.phys_recoil = recoil; 
-						}
-
+						case visual:   { cfg.vis_recoil  = recoil; cfg.vis_recoil_mlt = recoil / 1000.0f; break; }
+						case physical: { cfg.phys_recoil = recoil; break; }
+						default:       { cfg.vis_recoil  = cfg.phys_recoil = recoil; }
 						}
 					}
 				}
@@ -187,7 +174,7 @@ void DrawMenu(SDL_Window* window)
 		RenderFrame();
 	}
 
-	if (cfg.aimbot && *player_count > 1) aimbot();
+	if (cfg.aimbot && *player_count > 1 && !(cfg.target_fire && !local_player->equiped_wpn->consecutive_shots)) aimbot();
 
 	SwapWindow(window);
 }

@@ -19,22 +19,39 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 	float most_danger = MAX_FLOAT;
 	UINT lowest_hp = 1000;
 
-	float final_yaw = -360;
-	float final_pitch = -360;
+	float final_yaw   = 0.0f;
+	float final_pitch = 0.0f;
 
 	for (int x = 1; x < *player_count; ++x)
 	{
-		if (player_list[x]->dead || (player_list[x]->team == local_player->team && !cfg.target_team)) continue;
+		if (player_list[x]->health > 100 || (player_list[x]->team == local_player->team && !cfg.target_team)) continue;
 
 		float absX = local_player->x - player_list[x]->x;
 		float absY = local_player->y - player_list[x]->y;
 		float absZ = player_list[x]->z - local_player->z;
 		float distance = sqrtf((absX * absX) + (absY * absY));
 
+		float req_yaw   = (float)(atan2f(absY, absX) * (180 / M_PI) - 90);
+		float req_pitch = (float)(atan2f(absZ, distance) * (180 / M_PI));
+
+		if (req_yaw < 0.0f) req_yaw += 360.0f;
+
 		switch (cfg.target_mode)
 		{
-		case closest_fov: // NEED TO ADD
+		case closest_fov:
 		{
+			float yaw_dst   = std::abs(local_player->yaw - req_yaw);
+			float pitch_dst = std::abs(local_player->pitch - req_pitch);
+
+			if (yaw_dst > 180.0f) yaw_dst = std::abs(local_player->yaw - (360.0f - yaw_dst));
+
+			const float total_dst = yaw_dst + pitch_dst;
+			if (total_dst <= cfg.aimbot_fov && total_dst < closest_aim)
+			{
+				closest_aim = total_dst;
+				break;
+			}
+
 			continue;
 		}
 
@@ -66,8 +83,8 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 		}
 		}
 
-		final_yaw   = (float)(atan2f(absY, absX) * (180 / M_PI) - 90);
-		final_pitch = (float)(atan2f(absZ, distance) * (180 / M_PI));
+		final_yaw   = req_yaw;
+		final_pitch = req_pitch;
 	}
 	
 	if (final_yaw)
@@ -91,10 +108,12 @@ __declspec(naked) int SpreadDispatch()
 	{
 		call [eax+4]   // original VF call 
 		mov edx, [edi] // instruction overwritten by hook
-		push [esp+4]   // [esp+4] = player entity
+		push edx       // edx = player ent
+		push [esp+8]   // [esp+4] = player entity
 		push eax       // eax = spread value from VF
 		call SetSpread
 		add esp, 8
+		pop edx
 		ret
 	}
 }
