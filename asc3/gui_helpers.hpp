@@ -20,7 +20,7 @@ namespace ImGui
 
 	bool ColorEditEx(const char* const label, float col[4]);
 
-	void BindBox(char buffer[2], int* const vBuffer, const int ID);
+	void Hotkey(char buffer[2], int* const vBuffer, const int ID);
 
 	ImVec4 GetColor(const int original_color);
 }

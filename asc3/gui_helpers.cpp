@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "input.hpp"
+#include "config.hpp"
 #include "gui_helpers.hpp"
 
 namespace ImGui
@@ -136,7 +137,7 @@ namespace ImGui
 		return status;
 	}
 
-	void BindBox(char buffer[2], int* const vBuffer, const int ID)
+	void Hotkey(char buffer[2], int* const vBuffer, const int ID)
 	{
 		ImGui::SameLine();
 		ImGui::Text("-->");

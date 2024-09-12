@@ -1,8 +1,7 @@
-#define MAX_FLOAT 18446744073709551615.0f
-
 #include "pch.h"
 #include "input.hpp"
 #include "weapon.hpp"
+#include "config.hpp"
 #include "entities.hpp"
 #include "pScanning.hpp"
 
@@ -18,7 +17,7 @@ static float GetAngleDistance(const player_entity* const self, float final_yaw, 
 	if (yaw_dst > 180.0f) 
 		yaw_dst = std::abs(self->yaw - (360.0f - yaw_dst));
 
-	return sqrtf((yaw_dst * yaw_dst) + (pitch_dst * pitch_dst));
+	return sqrtf(powf(yaw_dst, 2.0f) + powf(pitch_dst, 2.0f));
 }
 
 static void GetAngleInfo(float& distance, float& yaw, float& pitch, const player_entity* const self, const player_entity* const target)
@@ -26,9 +25,11 @@ static void GetAngleInfo(float& distance, float& yaw, float& pitch, const player
 	const float absX = self->x - target->x;
 	const float absY = self->y - target->y;
 	const float absZ = target->z - self->z;
-	distance = sqrtf(pow(absX, 2) + pow(absY, 2));
+
+	distance = sqrtf(powf(absX, 2.0f) + powf(absY, 2.0f));
 	pitch = static_cast<float>(atan2f(absZ, distance) * (180.0f / M_PI));
 	yaw = static_cast<float>(atan2f(absY, absX) * (180.0f / M_PI) - 90.0f);
+
 	if (yaw < 0.0f) yaw += 360.0f;
 }
 
@@ -36,9 +37,10 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 {
 	player_entity** const player_list = *player_list_ptr;
 
-	float closest_dst = MAX_FLOAT;
-	float closest_aim = MAX_FLOAT;
-	float most_danger = MAX_FLOAT;
+	constexpr float max_float = 18446744073709551615.0f;
+	float closest_dst = max_float;
+	float closest_aim = max_float;
+	float most_danger = max_float;
 	UINT lowest_hp = 1000;
 
 	float final_yaw   = 0.0f;

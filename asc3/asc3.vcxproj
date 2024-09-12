@@ -149,6 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="config.hpp" />
     <ClInclude Include="gui_helpers.hpp" />
     <ClInclude Include="weapon.hpp" />
     <ClInclude Include="entities.hpp" />

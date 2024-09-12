@@ -5,6 +5,7 @@
 #include "init.hpp"
 #include "input.hpp"
 #include "weapon.hpp"
+#include "config.hpp"
 #include "entities.hpp"
 #include "pScanning.hpp"
 

@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "input.hpp"
+#include "config.hpp"
+#include "weapon.hpp"
 
 menu_cfg cfg;
 WndProc_sig og_wndproc;
@@ -25,10 +27,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		if (wParam == VK_INSERT)
 		{
 			SDL_SetRelativeMouseMode(static_cast<SDL_bool>(cfg.menu_open));
-
 			cfg.menu_open = !cfg.menu_open;
-			ImGui::GetIO().WantCaptureMouse = cfg.menu_open;
-			ImGui::GetIO().WantCaptureKeyboard = cfg.menu_open;
+
+			static auto& io = ImGui::GetIO();
+			io.WantCaptureMouse    = cfg.menu_open;
+			io.WantCaptureKeyboard = cfg.menu_open;
 
 			return 1;
 		}

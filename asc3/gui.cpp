@@ -2,6 +2,7 @@
 #include "gui.hpp"
 #include "input.hpp"
 #include "weapon.hpp"
+#include "config.hpp"
 #include "entities.hpp"
 #include "pScanning.hpp"
 #include "gui_helpers.hpp"
@@ -41,7 +42,7 @@ void DrawMenu(SDL_Window* window)
 			if (ImGui::BeginTabItem("Weapon"))
 			{
 				ImGui::CheckboxEx("Aimbot", &cfg.aimbot);
-				ImGui::BindBox(cfg.aimkey, &cfg.vAimkey, 0);
+				ImGui::Hotkey(cfg.aimkey, &cfg.vAimkey, 0);
 				if (cfg.aimbot)
 				{
 					static const char* modes[]{ "FOV", "Distance", "Danger", "Health" };
@@ -60,7 +61,7 @@ void DrawMenu(SDL_Window* window)
 				ImGui::CheckboxEx("Target teammates", &cfg.target_team);
 
 				const bool status_changed = ImGui::CheckboxEx("Adjust recoil", &cfg.adjust_recoil);
-				ImGui::BindBox(cfg.recoilkey, &cfg.vRecoilkey, 1);
+				ImGui::Hotkey(cfg.recoilkey, &cfg.vRecoilkey, 1);
 				if (cfg.adjust_recoil)
 				{
 					static const char* recoil_types[] = { "Visual", "Physical", "Both" };
@@ -77,7 +78,7 @@ void DrawMenu(SDL_Window* window)
 				else if (status_changed) SetRecoil(100.0f);
 
 				ImGui::CheckboxEx("Adjust spread", &cfg.adjust_spread); // SHOTGUN SPREAD MUST BE ADDED
-				ImGui::BindBox(cfg.spreadkey, &cfg.vSpreadkey, 2);
+				ImGui::Hotkey(cfg.spreadkey, &cfg.vSpreadkey, 2);
 				if (cfg.adjust_spread)
 				{
 					static const char* spread_types[] = { "Regular", "Shotgun", "Both" };
