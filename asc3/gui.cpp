@@ -59,29 +59,25 @@ void DrawMenu(SDL_Window* window)
 
 				ImGui::CheckboxEx("Target teammates", &cfg.target_team);
 
-				ImGui::CheckboxEx("Adjust recoil", &cfg.adjust_recoil);
+				const bool status_changed = ImGui::CheckboxEx("Adjust recoil", &cfg.adjust_recoil);
+				ImGui::BindBox(cfg.recoilkey, &cfg.vRecoilkey, 1);
 				if (cfg.adjust_recoil)
 				{
 					static const char* recoil_types[] = { "Visual", "Physical", "Both" };
 					const bool mode_changed = ImGui::ComboEx("##RECOIL_MODE", cfg.recoil_mode, recoil_types, IM_ARRAYSIZE(recoil_types));
 					ImGui::Description("recoil type");
 
-					static float recoil = 100.0f;
+					static float& recoil = cfg.recoil_slider;
 					const bool value_changed = ImGui::SliderFloatEx("##RECOIL_SLIDER", &recoil, 0.0f, 100.0f);
 					ImGui::Description("recoil percentage");
 
 					if (value_changed || mode_changed)
-					{
-						switch (cfg.recoil_mode)
-						{
-						case visual:   { cfg.vis_recoil  = recoil; cfg.vis_recoil_mlt = recoil / 1000.0f; break; }
-						case physical: { cfg.phys_recoil = recoil; break; }
-						default:       { cfg.vis_recoil  = cfg.phys_recoil = recoil; }
-						}
-					}
+						SetRecoil(recoil);
 				}
+				else if (status_changed) SetRecoil(100.0f);
 
 				ImGui::CheckboxEx("Adjust spread", &cfg.adjust_spread); // SHOTGUN SPREAD MUST BE ADDED
+				ImGui::BindBox(cfg.spreadkey, &cfg.vSpreadkey, 2);
 				if (cfg.adjust_spread)
 				{
 					static const char* spread_types[] = { "Regular", "Shotgun", "Both" };
@@ -162,9 +158,13 @@ void DrawMenu(SDL_Window* window)
 				ImGui::EndTabItem();
 			}
 
-			if (ImGui::BeginTabItem("Theme"))
+			if (ImGui::BeginTabItem("Settings"))
 			{
 				ImGui::CheckboxEx("Block game input", &cfg.block_input);
+				ImGui::ToolTip("Blocks the game from handling input while the menu is open");
+
+				ImGui::CheckboxEx("Block bound inputs", &cfg.block_binds);
+				ImGui::ToolTip("Blocks the game from handling any input that is bound to a feature of the cheat");
 
 				if (ImGui::ColorEditEx("Menu accent", cfg.menu_accent))
 				{

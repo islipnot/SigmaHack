@@ -14,3 +14,5 @@
 void aimbot();
 
 int SpreadDispatch();
+
+void SetRecoil(const float recoil);

@@ -26,6 +26,7 @@ struct menu_cfg
 	float shotgun_spread = 100.0f;
 	float aimbot_fov     = 90.0f;
 	float smoothing      = 0.0f;
+	float recoil_slider  = 100.0f;
 
 	// Visuals
 	bool skeletons  = false;
@@ -43,14 +44,19 @@ struct menu_cfg
 	float fov     = 90.0f;
 	float roll    = 0.0f;
 
-	// Theme
+	// Settings
 	bool menu_open       = true;
 	bool block_input     = true;
+	bool block_binds     = false;
 	float menu_accent[4] = { 0.2156862f, 0.0117647f, 0.3686274f, 0.85f }; // dark purple
 
 	// Binds
-	char aimkey[2] = "\0";
-	int vAimkey    = NULL;
+	char aimkey[2]    = "\0";
+	char recoilkey[2] = "\0";
+	char spreadkey[2] = "\0";
+	int vAimkey       = NULL;
+	int vRecoilkey    = NULL;
+	int vSpreadkey    = NULL;
 };
 
 extern menu_cfg cfg;

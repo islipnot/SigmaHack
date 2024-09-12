@@ -20,15 +20,40 @@ int HandleEvent(SDL_Event* sdl_event)
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	if (msg == WM_KEYDOWN && wParam == VK_INSERT)
+	if (msg == WM_KEYDOWN)
 	{
-		SDL_SetRelativeMouseMode(static_cast<SDL_bool>(cfg.menu_open));
+		if (wParam == VK_INSERT)
+		{
+			SDL_SetRelativeMouseMode(static_cast<SDL_bool>(cfg.menu_open));
 
-		cfg.menu_open = !cfg.menu_open;
-		ImGui::GetIO().WantCaptureMouse = cfg.menu_open;
-		ImGui::GetIO().WantCaptureKeyboard = cfg.menu_open;
+			cfg.menu_open = !cfg.menu_open;
+			ImGui::GetIO().WantCaptureMouse = cfg.menu_open;
+			ImGui::GetIO().WantCaptureKeyboard = cfg.menu_open;
 
-		return 1;
+			return 1;
+		}
+
+		else if (wParam == cfg.vAimkey)
+		{
+			cfg.aimbot = !cfg.aimbot;
+			if (cfg.block_binds) return 1;
+		}
+
+		else if (wParam == cfg.vRecoilkey)
+		{
+			cfg.adjust_recoil = !cfg.adjust_recoil;
+
+			if (!cfg.adjust_recoil) SetRecoil(100.0f);
+			else SetRecoil(cfg.recoil_slider);
+			
+			if (cfg.block_binds) return 1;
+		}
+
+		else if (wParam == cfg.vSpreadkey)
+		{
+			cfg.adjust_spread = !cfg.adjust_spread;
+			if (cfg.block_binds) return 1;
+		}
 	} 
 
 	return og_wndproc(hWnd, msg, wParam, lParam);

@@ -120,10 +120,13 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 
 static int SetSpread(const int spread_value, const player_entity* const player_ent)
 {
-	if (player_ent != local_player) return spread_value;
+	if (player_ent != local_player || !cfg.adjust_spread) 
+		return spread_value;
 
-	if (player_ent->equiped_wpn->weapon_id == shotgun_id) return spread_value * (cfg.shotgun_spread / 100.0f);
-	else return spread_value * (cfg.reg_spread / 100.0f);
+	if (player_ent->equiped_wpn->weapon_id == shotgun_id) 
+		return spread_value * (cfg.shotgun_spread / 100.0f);
+	else 
+		return spread_value * (cfg.reg_spread / 100.0f);
 }
 
 __declspec(naked) int SpreadDispatch()
@@ -139,5 +142,15 @@ __declspec(naked) int SpreadDispatch()
 		add esp, 8
 		pop edx
 		ret
+	}
+}
+
+void SetRecoil(const float recoil)
+{
+	switch (cfg.recoil_mode)
+	{
+	case visual:   { cfg.vis_recoil  = recoil; cfg.vis_recoil_mlt = recoil / 1000.0f; break; }
+	case physical: { cfg.phys_recoil = recoil; break; }
+	default:       { cfg.vis_recoil  = cfg.phys_recoil = recoil; }
 	}
 }
