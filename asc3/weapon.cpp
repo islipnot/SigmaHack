@@ -10,31 +10,31 @@ UINT* player_count;
 player_entity*** player_list_ptr;
 player_entity* local_player;
 
-static float GetAngleDistance(player_entity* self, float final_yaw, float final_pitch)
+static float GetAngleDistance(const player_entity* const self, float final_yaw, float final_pitch)
 {
 	float yaw_dst = std::abs(self->yaw - final_yaw);
-	float pitch_dst = std::abs(self->pitch - final_pitch);
+	const float pitch_dst = std::abs(self->pitch - final_pitch);
 
 	if (yaw_dst > 180.0f) 
 		yaw_dst = std::abs(self->yaw - (360.0f - yaw_dst));
 
-	return sqrtf(pow(yaw_dst, 2) + pow(pitch_dst, 2));
+	return sqrtf((yaw_dst * yaw_dst) + (pitch_dst * pitch_dst));
 }
 
-static void GetAngleInfo(float& distance, float& yaw, float& pitch, player_entity* self, player_entity* target)
+static void GetAngleInfo(float& distance, float& yaw, float& pitch, const player_entity* const self, const player_entity* const target)
 {
 	const float absX = self->x - target->x;
 	const float absY = self->y - target->y;
 	const float absZ = target->z - self->z;
 	distance = sqrtf(pow(absX, 2) + pow(absY, 2));
-	pitch = (float)(atan2f(absZ, distance) * (180.0f / M_PI));
-	yaw = (float)(atan2f(absY, absX) * (180.0f / M_PI) - 90.0f);
+	pitch = static_cast<float>(atan2f(absZ, distance) * (180.0f / M_PI));
+	yaw = static_cast<float>(atan2f(absY, absX) * (180.0f / M_PI) - 90.0f);
 	if (yaw < 0.0f) yaw += 360.0f;
 }
 
 void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 {
-	const auto player_list = *player_list_ptr;
+	player_entity** const player_list = *player_list_ptr;
 
 	float closest_dst = MAX_FLOAT;
 	float closest_aim = MAX_FLOAT;
@@ -46,7 +46,8 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 
 	for (int x = 1; x < *player_count; ++x)
 	{
-		if (player_list[x]->health > 100 || (player_list[x]->team == local_player->team && !cfg.target_team)) continue;
+		if (player_list[x]->health > 100 || (player_list[x]->team == local_player->team && !cfg.target_team)) 
+			continue;
 
 		float angle_dst, distance, new_yaw, new_pitch;
 		GetAngleInfo(distance, new_yaw, new_pitch, local_player, player_list[x]);
@@ -117,12 +118,12 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 	}
 }
 
-static int SetSpread(const int spread_value, player_entity* player_ent)
+static int SetSpread(const int spread_value, const player_entity* const player_ent)
 {
 	if (player_ent != local_player) return spread_value;
 
-	if (player_ent->equiped_wpn->weapon_id == shotgun_id) return spread_value * (cfg.shotgun_spread / 100);
-	else return spread_value * (cfg.reg_spread / 100);
+	if (player_ent->equiped_wpn->weapon_id == shotgun_id) return spread_value * (cfg.shotgun_spread / 100.0f);
+	else return spread_value * (cfg.reg_spread / 100.0f);
 }
 
 __declspec(naked) int SpreadDispatch()

@@ -3,25 +3,26 @@
 
 BYTE* ResolveAddress(const BYTE pattern[], const int pattern_size, const BYTE return_offset, const bool deref)
 {
-	static auto ac_client_base = (BYTE*)GetModuleHandle(L"ac_client.exe");
-
+	static const HMODULE ac_client_base = GetModuleHandle(L"ac_client.exe");
 	static MODULEINFO module_info{ NULL };
-	if (!module_info.lpBaseOfDll) GetModuleInformation(GetCurrentProcess(), HMODULE(ac_client_base), &module_info, sizeof(MODULEINFO));
 
-	auto module_base = (BYTE*)module_info.lpBaseOfDll;
-	const BYTE* scan_end = (module_base + module_info.SizeOfImage) - pattern_size;
+	if (!module_info.lpBaseOfDll) 
+		GetModuleInformation(GetCurrentProcess(), ac_client_base, &module_info, sizeof(MODULEINFO));
 
-	for (BYTE* cur_module_pos = module_base; cur_module_pos < scan_end; ++cur_module_pos)
+	auto module_ptr = reinterpret_cast<BYTE*>(module_info.lpBaseOfDll);
+	const BYTE* const scan_end = (module_ptr + module_info.SizeOfImage) - pattern_size;
+
+	for (;module_ptr < scan_end; ++module_ptr)
 	{
-		if (pattern[0] == *cur_module_pos)
+		if (pattern[0] == *module_ptr)
 		{
-			BYTE* resolved_base = cur_module_pos;
-			++cur_module_pos;
+			BYTE* resolved_base = module_ptr;
+			++module_ptr;
 
-			for (int x = 1; x < pattern_size; ++cur_module_pos, ++x)
+			for (int x = 1; x < pattern_size; ++module_ptr, ++x)
 			{
 				if (pattern[x] == unk) continue;
-				if (pattern[x] != *cur_module_pos)
+				if (pattern[x] != *module_ptr)
 				{
 					resolved_base = nullptr;
 					break;
@@ -30,9 +31,12 @@ BYTE* ResolveAddress(const BYTE pattern[], const int pattern_size, const BYTE re
 
 			if (resolved_base != nullptr)
 			{
-				BYTE* resolved_address = (resolved_base + (BYTE)return_offset);
-				if (deref) return *(BYTE**)resolved_address;
-				else return resolved_address;
+				BYTE* const resolved_address = resolved_base + return_offset;
+
+				if (deref) 
+					return *reinterpret_cast<BYTE**>(resolved_address);
+
+				return resolved_address;
 			}
 		}
 	}

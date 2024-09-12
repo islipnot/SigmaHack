@@ -22,13 +22,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_KEYDOWN && wParam == VK_INSERT)
 	{
-		SDL_SetRelativeMouseMode((SDL_bool)cfg.menu_open);
+		SDL_SetRelativeMouseMode(static_cast<SDL_bool>(cfg.menu_open));
 
 		cfg.menu_open = !cfg.menu_open;
 		ImGui::GetIO().WantCaptureMouse = cfg.menu_open;
 		ImGui::GetIO().WantCaptureKeyboard = cfg.menu_open;
 
-		return true;
+		return 1;
 	} 
 
 	return og_wndproc(hWnd, msg, wParam, lParam);

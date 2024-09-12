@@ -4,16 +4,23 @@
 #define dark_grey     3
 #define menu_border   4
 
-bool CheckboxEx(const char* const label, bool* const var);
+namespace ImGui
+{
+	void Description(const char* const desc);
 
-int SliderFloatEx(const char* label, float* var, const float min, const float max);
+	bool CheckboxEx(const char* const label, bool* const var);
 
-bool ComboEx(const char* label, int* selection, const char* items[], int item_count);
+	bool SliderFloatEx(const char* const label, float* const var, const float min, const float max);
 
-bool ResetButton(const int item_id);
+	bool ComboEx(const char* const label, int& selection, const char* const items[], const int item_count);
 
-void ToolTip(const char* const text);
+	bool ResetButton(const int item_id);
 
-bool ColorEditEx(const char* label, float col[4]);
+	void ToolTip(const char* const text);
 
-ImVec4 GetColor(const int original_color);
+	bool ColorEditEx(const char* const label, float col[4]);
+
+	void BindBox(char buffer[2], int* const vBuffer, const int ID);
+
+	ImVec4 GetColor(const int original_color);
+}
