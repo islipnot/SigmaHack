@@ -5,13 +5,13 @@
 
 namespace ImGui
 {
-	void Description(const char* const desc)
+	void Description(const char* desc)
 	{
 		ImGui::SameLine();
 		ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 0.50f }, desc);
 	}
 
-	bool CheckboxEx(const char* const label, bool* const var)
+	bool CheckboxEx(const char* label, bool* var)
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,   { 4.0f, 6.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding,  { 3.0f, 3.0f });
@@ -40,7 +40,7 @@ namespace ImGui
 		return status;
 	}
 
-	bool SliderFloatEx(const char* const label, float* const var, const float min, const float max)
+	bool SliderFloatEx(const char* label, float* var, float min, float max)
 	{
 		static const auto& style = ImGui::GetStyle();
 
@@ -53,7 +53,7 @@ namespace ImGui
 		return status;
 	}
 
-	bool ComboEx(const char* const label, int& selection, const char* const items[], const int item_count)
+	bool ComboEx(const char* label, int& selection, const char* items[], int item_count)
 	{
 		static const auto& style = ImGui::GetStyle();
 
@@ -100,7 +100,7 @@ namespace ImGui
 		return changed;
 	}
 
-	bool ResetButton(const int item_id)
+	bool ResetButton(int item_id)
 	{
 		ImGui::SameLine();
 
@@ -115,7 +115,7 @@ namespace ImGui
 		return status;
 	}
 
-	void ToolTip(const char* const text)
+	void ToolTip(const char* text)
 	{
 		ImGui::SameLine();
 
@@ -124,7 +124,7 @@ namespace ImGui
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip(text);
 	}
 
-	bool ColorEditEx(const char* const label, float col[4])
+	bool ColorEditEx(const char* label, float col[4])
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,   { 4.0f, 6.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding,  { 3.0f, 3.0f });
@@ -137,7 +137,7 @@ namespace ImGui
 		return status;
 	}
 
-	void Hotkey(char buffer[2], int* const vBuffer, const int ID)
+	void Hotkey(char buffer[2], int* vBuffer, int ID)
 	{
 		ImGui::SameLine();
 		ImGui::Text("-->");
@@ -163,7 +163,7 @@ namespace ImGui
 		ImGui::Description("hotkey");
 	}
 
-	ImVec4 GetColor(const int original_color)
+	ImVec4 GetColor(int original_color)
 	{
 		const auto& accent = cfg.menu_accent;
 

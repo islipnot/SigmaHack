@@ -6,21 +6,21 @@
 
 namespace ImGui
 {
-	void Description(const char* const desc);
+	void Description(const char* desc);
 
-	bool CheckboxEx(const char* const label, bool* const var);
+	bool CheckboxEx(const char* label, bool* var);
 
-	bool SliderFloatEx(const char* const label, float* const var, const float min, const float max);
+	bool SliderFloatEx(const char* label, float* var, float min, float max);
 
-	bool ComboEx(const char* const label, int& selection, const char* const items[], const int item_count);
+	bool ComboEx(const char* label, int& selection, const char* items[], int item_count);
 
-	bool ResetButton(const int item_id);
+	bool ResetButton(int item_id);
 
-	void ToolTip(const char* const text);
+	void ToolTip(const char* text);
 
-	bool ColorEditEx(const char* const label, float col[4]);
+	bool ColorEditEx(const char* label, float col[4]);
 
-	void Hotkey(char buffer[2], int* const vBuffer, const int ID);
+	void Hotkey(char buffer[2], int* vBuffer, int ID);
 
-	ImVec4 GetColor(const int original_color);
+	ImVec4 GetColor(int original_color);
 }

@@ -13,13 +13,13 @@ extern WndProc_sig og_wndproc;
 extern PollEvents_sig PollEvents;
 extern SwapWindow_sig SwapWindow;
 
-static void __VirtualProtect(void* const address, const int sz)
+static void __VirtualProtect(void* address, int sz)
 {
 	DWORD old;
 	VirtualProtect(address, sz, PAGE_EXECUTE_READWRITE, &old);
 }
 
-static void SetHook(BYTE* const hook_addr, const BYTE* const dst, const int extra_bytes = 0)
+static void SetHook(BYTE* hook_addr, const BYTE* dst, int extra_bytes = 0)
 {
 	__VirtualProtect(hook_addr, 5 + extra_bytes);
 
@@ -86,7 +86,7 @@ static void ResolvePatterns()
 	memcpy(vrecoil_addr, &vis_recoil_ptr, sizeof(float*));
 }
 
-static void* HookExport(const HMODULE hModule, const char* func_name, const DWORD export_replacement)
+static void* HookExport(HMODULE hModule, const char* func_name, DWORD export_replacement)
 {
 	auto target_export = *reinterpret_cast<DWORD**>((reinterpret_cast<BYTE*>(GetProcAddress(hModule, func_name)) + 2));
 	auto old_func_addr = *reinterpret_cast<DWORD**>(target_export);

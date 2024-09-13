@@ -1,16 +1,16 @@
 #include "pch.h"
 #include "pScanning.hpp"
 
-BYTE* ResolveAddress(const BYTE pattern[], const int pattern_size, const BYTE return_offset, const bool deref)
+BYTE* ResolveAddress(const BYTE pattern[], int pattern_size, BYTE return_offset, bool deref)
 {
-	static const HMODULE ac_client_base = GetModuleHandle(L"ac_client.exe");
+	static HMODULE ac_client_base = GetModuleHandle(L"ac_client.exe");
 	static MODULEINFO module_info{ NULL };
 
 	if (!module_info.lpBaseOfDll) 
 		GetModuleInformation(GetCurrentProcess(), ac_client_base, &module_info, sizeof(MODULEINFO));
 
 	auto module_ptr = reinterpret_cast<BYTE*>(module_info.lpBaseOfDll);
-	const BYTE* const scan_end = (module_ptr + module_info.SizeOfImage) - pattern_size;
+	const BYTE* scan_end = (module_ptr + module_info.SizeOfImage) - pattern_size;
 
 	for (;module_ptr < scan_end; ++module_ptr)
 	{

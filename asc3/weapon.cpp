@@ -9,10 +9,10 @@ UINT* player_count;
 player_entity*** player_list_ptr;
 player_entity* local_player;
 
-static float GetAngleDistance(const player_entity* const self, float final_yaw, float final_pitch)
+static float GetAngleDistance(const player_entity* self, float final_yaw, float final_pitch)
 {
 	float yaw_dst = std::abs(self->yaw - final_yaw);
-	const float pitch_dst = std::abs(self->pitch - final_pitch);
+	float pitch_dst = std::abs(self->pitch - final_pitch);
 
 	if (yaw_dst > 180.0f) 
 		yaw_dst = std::abs(self->yaw - (360.0f - yaw_dst));
@@ -20,7 +20,7 @@ static float GetAngleDistance(const player_entity* const self, float final_yaw, 
 	return sqrtf(powf(yaw_dst, 2.0f) + powf(pitch_dst, 2.0f));
 }
 
-static void GetAngleInfo(float& distance, float& yaw, float& pitch, const player_entity* const self, const player_entity* const target)
+static void GetAngleInfo(float& distance, float& yaw, float& pitch, const player_entity* self, const player_entity* target)
 {
 	const float absX = self->x - target->x;
 	const float absY = self->y - target->y;
@@ -35,7 +35,7 @@ static void GetAngleInfo(float& distance, float& yaw, float& pitch, const player
 
 void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 {
-	player_entity** const player_list = *player_list_ptr;
+	player_entity** player_list = *player_list_ptr;
 
 	constexpr float max_float = 18446744073709551615.0f;
 	float closest_dst = max_float;
@@ -120,7 +120,7 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 	}
 }
 
-static int SetSpread(const int spread_value, const player_entity* const player_ent)
+static int SetSpread(int spread_value, const player_entity* player_ent)
 {
 	if (player_ent != local_player || !cfg.adjust_spread) 
 		return spread_value;
@@ -147,7 +147,7 @@ __declspec(naked) int SpreadDispatch()
 	}
 }
 
-void SetRecoil(const float recoil)
+void SetRecoil(float recoil)
 {
 	switch (cfg.recoil_mode)
 	{
