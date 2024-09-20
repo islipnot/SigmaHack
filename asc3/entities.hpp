@@ -93,6 +93,6 @@ struct player_entity
 	wpn_class* equiped_wpn;    //0x0364
 };
 
-extern UINT* player_count;
-extern player_entity*** player_list_ptr;
-extern player_entity* local_player;
+extern UINT* PlayerCount;
+extern player_entity*** pPlayerList;
+extern player_entity* LocalPlayer;

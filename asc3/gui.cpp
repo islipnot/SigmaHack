@@ -7,16 +7,16 @@
 #include "pScanning.hpp"
 #include "gui_helpers.hpp"
 
-SwapWindow_sig SwapWindow;
+SwapWindowSig SwapWindow;
 
-static inline void RenderFrame()
+inline void RenderFrame()
 {
 	ImGui::End();
 	ImGui::Render();
 	ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }
 
-static void SetupFrame()
+void SetupFrame()
 {
 	ImGui_ImplOpenGL2_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
@@ -32,7 +32,7 @@ static void SetupFrame()
 
 void DrawMenu(SDL_Window* window)
 {
-	if (cfg.menu_open)
+	if (cfg.MenuOpen)
 	{
 		SetupFrame();
 
@@ -46,56 +46,56 @@ void DrawMenu(SDL_Window* window)
 				if (cfg.aimbot)
 				{
 					static const char* modes[]{ "FOV", "Distance", "Danger", "Health" };
-					ImGui::ComboEx("##MODES", cfg.target_mode, modes, IM_ARRAYSIZE(modes));
+					ImGui::ComboEx("##MODES", cfg.TargetMode, modes, IM_ARRAYSIZE(modes));
 					ImGui::Description("targeting mode");
 
 					ImGui::SliderFloatEx("##SMOOTHING", &cfg.smoothing, 0.0f, 100.0f);
 					ImGui::Description("smoothing");
 
-					ImGui::SliderFloatEx("##AIMBOT_FOV", &cfg.aimbot_fov, 0.5f, 360.0f);
+					ImGui::SliderFloatEx("##AIMBOT_FOV", &cfg.AimbotFOV, 0.5f, 360.0f);
 					ImGui::Description("aimbot fov");
 				}
 
-				ImGui::CheckboxEx("Target on shoot", &cfg.target_fire);
+				ImGui::CheckboxEx("Target on shoot", &cfg.TargetFire);
 
-				ImGui::CheckboxEx("Target teammates", &cfg.target_team);
+				ImGui::CheckboxEx("Target teammates", &cfg.TargetTeam);
 
-				const bool status_changed = ImGui::CheckboxEx("Adjust recoil", &cfg.adjust_recoil);
+				const bool StatusChange = ImGui::CheckboxEx("Adjust recoil", &cfg.AdjustRecoil);
 				ImGui::Hotkey(cfg.recoilkey, &cfg.vRecoilkey, 1);
-				if (cfg.adjust_recoil)
+				if (cfg.AdjustRecoil)
 				{
-					static const char* recoil_types[] = { "Visual", "Physical", "Both" };
-					const bool mode_changed = ImGui::ComboEx("##RECOIL_MODE", cfg.recoil_mode, recoil_types, IM_ARRAYSIZE(recoil_types));
+					static const char* modes[] = { "Visual", "Physical", "Both" };
+					const bool ModeChange = ImGui::ComboEx("##RECOIL_MODE", cfg.RecoilMode, modes, IM_ARRAYSIZE(modes));
 					ImGui::Description("recoil type");
 
-					static float& recoil = cfg.recoil_slider;
-					const bool value_changed = ImGui::SliderFloatEx("##RECOIL_SLIDER", &recoil, 0.0f, 100.0f);
+					static float& recoil = cfg.RecoilSlider;
+					const bool ValueChange = ImGui::SliderFloatEx("##RECOIL_SLIDER", &recoil, 0.0f, 100.0f);
 					ImGui::Description("recoil percentage");
 
-					if (value_changed || mode_changed)
+					if (ValueChange || ModeChange)
 						SetRecoil(recoil);
 				}
-				else if (status_changed) SetRecoil(100.0f);
+				else if (StatusChange) SetRecoil(100.0f);
 
-				ImGui::CheckboxEx("Adjust spread", &cfg.adjust_spread); // SHOTGUN SPREAD MUST BE ADDED
+				ImGui::CheckboxEx("Adjust spread", &cfg.AdjustSpread); // SHOTGUN SPREAD MUST BE ADDED
 				ImGui::Hotkey(cfg.spreadkey, &cfg.vSpreadkey, 2);
-				if (cfg.adjust_spread)
+				if (cfg.AdjustSpread)
 				{
-					static const char* spread_types[] = { "Regular", "Shotgun", "Both" };
-					const bool mode_changed = ImGui::ComboEx("##SPREAD_MODE", cfg.spread_mode, spread_types, IM_ARRAYSIZE(spread_types));
+					static const char* modes[] = { "Regular", "Shotgun", "Both" };
+					const bool ModeChange = ImGui::ComboEx("##SPREAD_MODE", cfg.SpreadMode, modes, IM_ARRAYSIZE(modes));
 					ImGui::Description("spread type");
 
 					static float spread = 100.0f;
-					const bool value_changed = ImGui::SliderFloatEx("##SPREAD_SLIDER", &spread, 0.0f, 100.0f);
+					const bool ValueChange = ImGui::SliderFloatEx("##SPREAD_SLIDER", &spread, 0.0f, 100.0f);
 					ImGui::Description("spread percentage");
 
-					if (value_changed || mode_changed)
+					if (ValueChange || ModeChange)
 					{
-						switch (cfg.spread_mode)
+						switch (cfg.SpreadMode)
 						{
-						case regular: { cfg.reg_spread     = spread; break; }
-						case shotgun: { cfg.shotgun_spread = spread; break; }
-						default:      { cfg.reg_spread     = cfg.shotgun_spread = spread; }
+						case regular: cfg.RegSpread     = spread; break;
+						case shotgun: cfg.ShotgunSpread = spread; break;
+						default:      cfg.RegSpread     = cfg.ShotgunSpread = spread;
 						}
 					}
 				}
@@ -110,12 +110,12 @@ void DrawMenu(SDL_Window* window)
 
 			if (ImGui::BeginTabItem("Exploits"))
 			{
-				if (ImGui::CheckboxEx("Force full auto", &cfg.force_auto))
+				if (ImGui::CheckboxEx("Force full auto", &cfg.ForceAuto))
 				{
-					const bool status = cfg.force_auto;
-					local_player->pistol->weapon_info->is_auto = status;
-					local_player->shotty->weapon_info->is_auto = status;
-					local_player->sniper->weapon_info->is_auto = status;
+					const bool status = cfg.ForceAuto;
+					LocalPlayer->pistol->weapon_info->is_auto = status;
+					LocalPlayer->shotty->weapon_info->is_auto = status;
+					LocalPlayer->sniper->weapon_info->is_auto = status;
 				}
 				ImGui::ToolTip("Removes the need to click every time you shoot with single fire weapons");
 
@@ -124,14 +124,14 @@ void DrawMenu(SDL_Window* window)
 
 			if (ImGui::BeginTabItem("Misc"))
 			{
-				if (ImGui::CheckboxEx("Adjust FOV", &cfg.adj_fov))
+				if (ImGui::CheckboxEx("Adjust FOV", &cfg.AdjFOV))
 				{
-					if (cfg.adj_fov) 
+					if (cfg.AdjFOV) 
 						*cfg.pFov = cfg.fov;
 					else 
 						*cfg.pFov = 90.0f;
 				}
-				if (cfg.adj_fov)
+				if (cfg.AdjFOV)
 				{
 					if (ImGui::ResetButton(0))
 						*cfg.pFov = cfg.fov = 90.0f;
@@ -140,20 +140,20 @@ void DrawMenu(SDL_Window* window)
 						*cfg.pFov = cfg.fov;
 				}
 
-				if (ImGui::CheckboxEx("Adjust roll", &cfg.adj_roll))
+				if (ImGui::CheckboxEx("Adjust roll", &cfg.AdjRoll))
 				{
-					if (cfg.adj_roll) 
-						local_player->roll = cfg.roll;
+					if (cfg.AdjRoll) 
+						LocalPlayer->roll = cfg.roll;
 					else 
-						local_player->roll = 0.0f;
+						LocalPlayer->roll = 0.0f;
 				}
-				if (cfg.adj_roll)
+				if (cfg.AdjRoll)
 				{
 					if (ImGui::ResetButton(1))
-						local_player->roll = cfg.roll = 0.0f;
+						LocalPlayer->roll = cfg.roll = 0.0f;
 						
 					if (ImGui::SliderFloatEx("##ROLL_SLIDER", &cfg.roll, 0.0f, 360.0f))
-						local_player->roll = cfg.roll;
+						LocalPlayer->roll = cfg.roll;
 				}
 
 				ImGui::EndTabItem();
@@ -161,13 +161,13 @@ void DrawMenu(SDL_Window* window)
 
 			if (ImGui::BeginTabItem("Settings"))
 			{
-				ImGui::CheckboxEx("Block game input", &cfg.block_input);
+				ImGui::CheckboxEx("Block game input", &cfg.BlockInput);
 				ImGui::ToolTip("Blocks the game from handling input while the menu is open");
 
-				ImGui::CheckboxEx("Block bound inputs", &cfg.block_binds);
+				ImGui::CheckboxEx("Block bound inputs", &cfg.BlockBinds);
 				ImGui::ToolTip("Blocks the game from handling any input that is bound to a feature of the cheat");
 
-				if (ImGui::ColorEditEx("Menu accent", cfg.menu_accent))
+				if (ImGui::ColorEditEx("Menu accent", cfg.MenuAccent))
 				{
 					static auto& colors = ImGui::GetStyle().Colors;
 
@@ -191,7 +191,7 @@ void DrawMenu(SDL_Window* window)
 		RenderFrame();
 	}
 
-	if (cfg.aimbot && *player_count > 1 && !(cfg.target_fire && !local_player->equiped_wpn->consecutive_shots)) aimbot();
+	if (cfg.aimbot && *PlayerCount > 1 && !(cfg.TargetFire && !LocalPlayer->equiped_wpn->consecutive_shots)) aimbot();
 
 	SwapWindow(window);
 }
@@ -268,7 +268,7 @@ SDL_Window* InitGui()
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigWindowsResizeFromEdges = false;
 
-	io.Fonts->AddFontFromFileTTF("c:\\aileron.ttf", 16);
+	io.Fonts->AddFontFromFileTTF("c:\\Aileron.ttf", 16);
 	io.FontDefault = io.Fonts->Fonts[0];
 
 	return *window_ptr;

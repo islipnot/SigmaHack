@@ -5,22 +5,22 @@
 #include "entities.hpp"
 #include "pScanning.hpp"
 
-UINT* player_count;
-player_entity*** player_list_ptr;
-player_entity* local_player;
+UINT* PlayerCount;
+player_entity*** pPlayerList;
+player_entity* LocalPlayer;
 
-static float GetAngleDistance(const player_entity* self, float final_yaw, float final_pitch)
+float GetAngleDistance(const player_entity* self, float FinalYaw, float FinalPitch)
 {
-	float yaw_dst = std::abs(self->yaw - final_yaw);
-	float pitch_dst = std::abs(self->pitch - final_pitch);
+	float YawDst = std::abs(self->yaw - FinalYaw);
+	float PitchDst = std::abs(self->pitch - FinalPitch);
 
-	if (yaw_dst > 180.0f) 
-		yaw_dst = std::abs(self->yaw - (360.0f - yaw_dst));
+	if (YawDst > 180.0f) 
+		YawDst = std::abs(self->yaw - (360.0f - YawDst));
 
-	return sqrtf(powf(yaw_dst, 2.0f) + powf(pitch_dst, 2.0f));
+	return sqrtf(powf(YawDst, 2.0f) + powf(PitchDst, 2.0f));
 }
 
-static void GetAngleInfo(float& distance, float& yaw, float& pitch, const player_entity* self, const player_entity* target)
+void GetAngleInfo(float& distance, float& yaw, float& pitch, const player_entity* self, const player_entity* target)
 {
 	const float absX = self->x - target->x;
 	const float absY = self->y - target->y;
@@ -35,36 +35,36 @@ static void GetAngleInfo(float& distance, float& yaw, float& pitch, const player
 
 void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 {
-	player_entity** player_list = *player_list_ptr;
+	player_entity** PlayerList = *pPlayerList;
 
-	constexpr float max_float = 18446744073709551615.0f;
-	float closest_dst = max_float;
-	float closest_aim = max_float;
-	float most_danger = max_float;
-	UINT lowest_hp = 1000;
+	constexpr float MaxFloat = 18446744073709551615.0f;
+	float ClosestDst = MaxFloat;
+	float ClosestAim = MaxFloat;
+	float MostDanger = MaxFloat;
+	UINT LowestHp = 1000;
 
-	float final_yaw   = 0.0f;
-	float final_pitch = 0.0f;
+	float FinalYaw   = 0.0f;
+	float FinalPitch = 0.0f;
 
-	for (int x = 1; x < *player_count; ++x)
+	for (int x = 1; x < *PlayerCount; ++x)
 	{
-		if (player_list[x]->health > 100 || (player_list[x]->team == local_player->team && !cfg.target_team)) 
+		if (PlayerList[x]->health > 100 || (PlayerList[x]->team == LocalPlayer->team && !cfg.TargetTeam)) 
 			continue;
 
-		float angle_dst, distance, new_yaw, new_pitch;
-		GetAngleInfo(distance, new_yaw, new_pitch, local_player, player_list[x]);
-		angle_dst = GetAngleDistance(local_player, new_yaw, new_pitch);
+		float AngleDst, distance, NewYaw, NewPitch;
+		GetAngleInfo(distance, NewYaw, NewPitch, LocalPlayer, PlayerList[x]);
+		AngleDst = GetAngleDistance(LocalPlayer, NewYaw, NewPitch);
 
-		if (angle_dst > cfg.aimbot_fov)
+		if (AngleDst > cfg.AimbotFOV)
 			continue;
 
-		switch (cfg.target_mode)
+		switch (cfg.TargetMode)
 		{
-		case closest_fov:
+		case ClosestFOV:
 		{
-			if (angle_dst < closest_aim)
+			if (AngleDst < ClosestAim)
 			{
-				closest_aim = angle_dst;
+				ClosestAim = AngleDst;
 				break;
 			}
 
@@ -73,9 +73,9 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 
 		case closest:
 		{
-			if (distance < closest_dst)
+			if (distance < ClosestDst)
 			{
-				closest_dst = distance;
+				ClosestDst = distance;
 				break;
 			}
 
@@ -85,12 +85,12 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 		case danger:
 		{
 			float targ_new_yaw, targ_new_pitch;
-			GetAngleInfo(distance, targ_new_yaw, targ_new_pitch, player_list[x], local_player);
-			angle_dst = GetAngleDistance(player_list[x], targ_new_yaw, targ_new_pitch);
+			GetAngleInfo(distance, targ_new_yaw, targ_new_pitch, PlayerList[x], LocalPlayer);
+			AngleDst = GetAngleDistance(PlayerList[x], targ_new_yaw, targ_new_pitch);
 
-			if (angle_dst < most_danger)
+			if (AngleDst < MostDanger)
 			{
-				most_danger = angle_dst;
+				MostDanger = AngleDst;
 				break;
 			}
 
@@ -99,9 +99,9 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 
 		case lowest:
 		{
-			if (player_list[x]->health < lowest_hp)
+			if (PlayerList[x]->health < LowestHp)
 			{
-				lowest_hp = player_list[x]->health;
+				LowestHp = PlayerList[x]->health;
 				break;
 			}
 
@@ -109,26 +109,26 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 		}
 		}
 
-		final_yaw = new_yaw;
-		final_pitch = new_pitch;
+		FinalYaw = NewYaw;
+		FinalPitch = NewPitch;
 	}
 	
-	if (final_yaw)
+	if (FinalYaw)
 	{
-		local_player->yaw = final_yaw;
-		local_player->pitch = final_pitch;
+		LocalPlayer->yaw = FinalYaw;
+		LocalPlayer->pitch = FinalPitch;
 	}
 }
 
-static int SetSpread(int spread_value, const player_entity* player_ent)
+int SetSpread(int SpreadValue, const player_entity* PlayerEnt)
 {
-	if (player_ent != local_player || !cfg.adjust_spread) 
-		return spread_value;
+	if (PlayerEnt != LocalPlayer || !cfg.AdjustSpread) 
+		return SpreadValue;
 
-	if (player_ent->equiped_wpn->weapon_id == shotgun_id) 
-		return spread_value * (cfg.shotgun_spread / 100.0f);
+	if (PlayerEnt->equiped_wpn->weapon_id == shotgun_id) 
+		return SpreadValue * (cfg.ShotgunSpread / 100.0f);
 	else 
-		return spread_value * (cfg.reg_spread / 100.0f);
+		return SpreadValue * (cfg.RegSpread / 100.0f);
 }
 
 __declspec(naked) int SpreadDispatch()
@@ -149,10 +149,10 @@ __declspec(naked) int SpreadDispatch()
 
 void SetRecoil(float recoil)
 {
-	switch (cfg.recoil_mode)
+	switch (cfg.RecoilMode)
 	{
-	case visual:   { cfg.vis_recoil  = recoil; cfg.vis_recoil_mlt = recoil / 1000.0f; break; }
-	case physical: { cfg.phys_recoil = recoil; break; }
-	default:       { cfg.vis_recoil  = cfg.phys_recoil = recoil; }
+	case visual:   cfg.VisRecoil  = recoil; cfg.VisRecoilMulti = recoil / 1000.0f; break;
+	case physical: cfg.PhysRecoil = recoil; break;
+	default:       cfg.VisRecoil  = cfg.PhysRecoil = recoil;
 	}
 }

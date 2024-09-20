@@ -1,42 +1,38 @@
 #include "pch.h"
 #include "pScanning.hpp"
 
-BYTE* ResolveAddress(const BYTE pattern[], int pattern_size, BYTE return_offset, bool deref)
+BYTE* ResolveAddress(const BYTE pattern[], int PatternSz, BYTE RetOffset, bool deref)
 {
-	static HMODULE ac_client_base = GetModuleHandle(L"ac_client.exe");
-	static MODULEINFO module_info{ NULL };
+	static HMODULE hModule = GetModuleHandle(L"ac_client.exe");
+	static MODULEINFO ModuleInfo{ NULL };
 
-	if (!module_info.lpBaseOfDll) 
-		GetModuleInformation(GetCurrentProcess(), ac_client_base, &module_info, sizeof(MODULEINFO));
+	if (!ModuleInfo.lpBaseOfDll) 
+		GetModuleInformation(GetCurrentProcess(), hModule, &ModuleInfo, sizeof(MODULEINFO));
 
-	auto module_ptr = reinterpret_cast<BYTE*>(module_info.lpBaseOfDll);
-	const BYTE* scan_end = (module_ptr + module_info.SizeOfImage) - pattern_size;
+	auto pModule = reinterpret_cast<BYTE*>(ModuleInfo.lpBaseOfDll);
+	const BYTE* ScanEnd = (pModule + ModuleInfo.SizeOfImage) - PatternSz;
 
-	for (;module_ptr < scan_end; ++module_ptr)
+	for (;pModule < ScanEnd; ++pModule)
 	{
-		if (pattern[0] == *module_ptr)
+		if (pattern[0] == *pModule)
 		{
-			BYTE* resolved_base = module_ptr;
-			++module_ptr;
+			BYTE* ResolvedBase = pModule;
+			++pModule;
 
-			for (int x = 1; x < pattern_size; ++module_ptr, ++x)
+			for (int x = 1; x < PatternSz; ++pModule, ++x)
 			{
 				if (pattern[x] == unk) continue;
-				if (pattern[x] != *module_ptr)
+				if (pattern[x] != *pModule)
 				{
-					resolved_base = nullptr;
+					ResolvedBase = nullptr;
 					break;
 				}
 			}
 
-			if (resolved_base != nullptr)
+			if (ResolvedBase != nullptr)
 			{
-				BYTE* const resolved_address = resolved_base + return_offset;
-
-				if (deref) 
-					return *reinterpret_cast<BYTE**>(resolved_address);
-
-				return resolved_address;
+				BYTE* const ResolvedAddr = ResolvedBase + RetOffset;
+				return deref ? *reinterpret_cast<BYTE**>(ResolvedAddr) : ResolvedAddr;
 			}
 		}
 	}

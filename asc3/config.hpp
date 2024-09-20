@@ -1,5 +1,5 @@
 // Targeting modes
-#define closest_fov 0  // targets whoever is closest to the center of FOV circle
+#define ClosestFOV 0  // targets whoever is closest to the center of FOV circle
 #define closest     1  // targets whoever is closest to the player
 #define danger      2  // targets whoever is most likely to kill the user
 #define lowest      3  // targets whoever is the lowest health
@@ -15,44 +15,44 @@
 struct menu_cfg
 {
 	// Weapon
-	int target_mode      = closest_fov;
-	int recoil_mode      = visual;
-	int spread_mode      = regular;
+	int TargetMode       = ClosestFOV;
+	int RecoilMode       = visual;
+	int SpreadMode       = regular;
 	bool aimbot          = false;
-	bool target_fire     = true;
-	bool target_team     = false;
-	bool adjust_recoil   = false;
-	bool adjust_spread   = false;
-	float vis_recoil_mlt = 0.1f;
-	float vis_recoil     = 100.0f;
-	float phys_recoil    = 100.0f;
-	float reg_spread     = 100.0f;
-	float shotgun_spread = 100.0f;
-	float aimbot_fov     = 90.0f;
+	bool TargetFire      = true;
+	bool TargetTeam      = false;
+	bool AdjustRecoil    = false;
+	bool AdjustSpread    = false;
+	float VisRecoilMulti = 0.1f;
+	float VisRecoil      = 100.0f;
+	float PhysRecoil     = 100.0f;
+	float RegSpread      = 100.0f;
+	float ShotgunSpread  = 100.0f;
+	float AimbotFOV      = 90.0f;
 	float smoothing      = 0.0f;
-	float recoil_slider  = 100.0f;
+	float RecoilSlider   = 100.0f;
 
 	// Visuals
 	bool skeletons  = false;
 	bool boxes      = false;
 	bool snaplines  = false;
-	bool health_bar = false;
+	bool HealthBar  = false;
 
 	// Exploits
-	bool force_auto = false;
+	bool ForceAuto = false;
 
 	// Misc
-	bool adj_fov  = false;
-	bool adj_roll = false;
+	bool AdjFOV   = false;
+	bool AdjRoll  = false;
 	float* pFov   = nullptr;
 	float fov     = 90.0f;
 	float roll    = 0.0f;
 
 	// Settings
-	bool menu_open       = true;
-	bool block_input     = true;
-	bool block_binds     = false;
-	float menu_accent[4] = { 0.2156862f, 0.0117647f, 0.3686274f, 0.85f }; // dark purple
+	bool MenuOpen       = true;
+	bool BlockInput     = true;
+	bool BlockBinds     = false;
+	float MenuAccent[4] = { 0.2156862f, 0.0117647f, 0.3686274f, 0.85f }; // dark purple
 
 	// Binds
 	char aimkey[2]    = "\0";

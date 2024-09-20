@@ -1,4 +1,4 @@
-typedef void(*SwapWindow_sig)(SDL_Window*);
+typedef void(*SwapWindowSig)(SDL_Window*);
 
 SDL_Window* InitGui();
 

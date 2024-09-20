@@ -9,91 +9,98 @@
 #include "entities.hpp"
 #include "pScanning.hpp"
 
-extern WndProc_sig og_wndproc;
-extern PollEvents_sig PollEvents;
-extern SwapWindow_sig SwapWindow;
+extern WndProcSig ogWndProc;
+extern PollEventsSig PollEvents;
+extern SwapWindowSig SwapWindow;
 
-static void __VirtualProtect(void* address, int sz)
+void __VirtualProtect(void* address, int sz)
 {
 	DWORD old;
 	VirtualProtect(address, sz, PAGE_EXECUTE_READWRITE, &old);
 }
 
-static void SetHook(BYTE* hook_addr, const BYTE* dst, int extra_bytes = 0)
+void SetHook(BYTE* HookAddr, const BYTE* dst, int ExtraBytes = 0)
 {
-	__VirtualProtect(hook_addr, 5 + extra_bytes);
+	__VirtualProtect(HookAddr, 5 + ExtraBytes);
 
-	*hook_addr = 0xE8; // 0xE8 = call
-	*reinterpret_cast<DWORD*>(hook_addr + 1) = dst - (hook_addr + 5);
+	*HookAddr = 0xE8; // 0xE8 = call
+	*reinterpret_cast<DWORD*>(HookAddr + 1) = dst - (HookAddr + 5);
 
-	if (extra_bytes) memset(hook_addr + 5, 0x90, extra_bytes); // NOP'ing specified bytes
+	if (ExtraBytes) memset(HookAddr + 5, 0x90, ExtraBytes); // NOP'ing specified bytes
 }
 
-static void ResolvePatterns()
+void ResolvePatterns()
 {
-	// Getting entity pointers
-	constexpr BYTE ent_list_pattern[] = {
-		0xA1, unk, unk, unk, unk, // mov eax, ent_list
-		0x8B, 0x34, 0xB8,         // mov esi, [eax+edi*4]
-		0x85, 0xF6,               // test esi, esi
-		0x0F, 0x84,               // jz x
+	// Defining patterns
+
+	constexpr BYTE EntListPattern[] = {
+		0xA1, unk, unk, unk, unk,                   // mov eax, ent_list
+		0x8B, 0x34, 0xB8,                           // mov esi, [eax+edi*4]
+		0x85, 0xF6,                                 // test esi, esi
+		0x0F, 0x84,                                 // jz x
 	};
-	const auto ent_list_ptr = reinterpret_cast<player_entity***>(ResolveAddress(ent_list_pattern, sizeof(ent_list_pattern), 1));
-
-	player_list_ptr = ent_list_ptr;
-	player_count = reinterpret_cast<UINT*>(ent_list_ptr + 2);
-	local_player = *reinterpret_cast<player_entity**>(ent_list_ptr - 1); 
-
-	// Getting FOV pointer
-	constexpr BYTE fov_pattern[] = {
+	constexpr BYTE FovPattern[] = {
 		0xF3, 0x0F, 0x10, 0x05, unk, unk, unk, unk, // movss xmm0, fov
 		0x5B,                                       // pop ebx
 		0xC3                                        // retn
 	};
-	cfg.pFov = reinterpret_cast<float*>(ResolveAddress(fov_pattern, sizeof(fov_pattern), 4));
-	cfg.fov = *cfg.pFov;
-
-	// Getting address where roll is set
-	constexpr BYTE roll_pattern[] = {
-		0xF3, 0x0F, 0x11, 0x56, 0x3C,   // movss [esi+0xROLL_OFFSET], xmm0
-		0x3B, 0x35, unk, unk, unk, unk, // cmp esi, local_player
-		0x74                            // jz x
+	constexpr BYTE RollPattern[] = {
+		0xF3, 0x0F, 0x11, 0x56, 0x3C,               // movss [esi+0xROLL_OFFSET], xmm0
+		0x3B, 0x35, unk, unk, unk, unk,             // cmp esi, local_player
+		0x74                                        // jz x
 	};
-	BYTE* const roll_patch = ResolveAddress(roll_pattern, sizeof(roll_pattern), 0, false);
-
-	__VirtualProtect(roll_patch, 5);
-	memset(roll_patch, 0x90, 5);
-
-	// Getting address of the call to vFunc responsible for getting a spread value
-	constexpr BYTE spread_pattern[] = {
-		0xFF, 0x50, 0x04, // call [eax+4]
-		0x8B, 0x17,       // mov edx, [edi]
-		0x8B, 0xF0        // mov esi, eax
+	constexpr BYTE SpreadPattern[] = {
+		0xFF, 0x50, 0x04,                           // call [eax+4]
+		0x8B, 0x17,                                 // mov edx, [edi]
+		0x8B, 0xF0                                  // mov esi, eax
 	};
-	BYTE* const spread_addr = ResolveAddress(spread_pattern, sizeof(spread_pattern), 0, false);
-
-	SetHook(spread_addr, reinterpret_cast<BYTE*>(SpreadDispatch), 0);
-
-	// Locating address at which the visual recoil multiplier is to be applied
-	constexpr BYTE vrecoil_pattern[] = {
+	constexpr BYTE vRecoilPattern[] = {
 		0xF3, 0x0F, 0x59, 0x05, unk, unk, unk, unk, // mulss xmm0, x
 		0xF3, 0x0F, 0x5D, 0xD0                      // minss xmm2, xmm0
 	};
-	BYTE* const vrecoil_addr = ResolveAddress(vrecoil_pattern, sizeof(vrecoil_pattern), 4, false);
 
-	__VirtualProtect(vrecoil_addr, 4);
-	const float* const vis_recoil_ptr = &cfg.vis_recoil_mlt;
-	memcpy(vrecoil_addr, &vis_recoil_ptr, sizeof(float*));
+	// Getting entity pointers
+
+	const auto ent_list_ptr = reinterpret_cast<player_entity***>(ResolveAddress(EntListPattern, sizeof(EntListPattern), 1));
+
+	pPlayerList = ent_list_ptr;
+	PlayerCount    = reinterpret_cast<UINT*>(ent_list_ptr + 2);
+	LocalPlayer    = *reinterpret_cast<player_entity**>(ent_list_ptr - 1); 
+
+	// Getting FOV pointer
+
+	cfg.pFov = reinterpret_cast<float*>(ResolveAddress(FovPattern, sizeof(FovPattern), 4));
+	cfg.fov = *cfg.pFov;
+
+	// Getting roll patch address
+
+	BYTE* RollPatch = ResolveAddress(RollPattern, sizeof(RollPattern), 0, false);
+
+	__VirtualProtect(RollPatch, 5);
+	memset(RollPatch, 0x90, 5);
+
+	// Hooking the address at which spread is determined
+
+	BYTE* SpreadAddr = ResolveAddress(SpreadPattern, sizeof(SpreadPattern), 0, false);
+	SetHook(SpreadAddr, reinterpret_cast<BYTE*>(SpreadDispatch), 0);
+
+	// Locating the address at which the visual recoil multiplier is to be copied
+
+	BYTE* vRecoilAddr = ResolveAddress(vRecoilPattern, sizeof(vRecoilPattern), 4, false);
+	__VirtualProtect(vRecoilAddr, 4);
+
+	float* pVisRecoil = &cfg.VisRecoilMulti;
+	memcpy(vRecoilAddr, &pVisRecoil, sizeof(float*));
 }
 
-static void* HookExport(HMODULE hModule, const char* func_name, DWORD export_replacement)
+void* HookExport(HMODULE hModule, const char* fnName, DWORD ExportHook)
 {
-	auto target_export = *reinterpret_cast<DWORD**>((reinterpret_cast<BYTE*>(GetProcAddress(hModule, func_name)) + 2));
+	auto target_export = *reinterpret_cast<DWORD**>((reinterpret_cast<BYTE*>(GetProcAddress(hModule, fnName)) + 2));
 	auto old_func_addr = *reinterpret_cast<DWORD**>(target_export);
 
 	__VirtualProtect(target_export, sizeof(DWORD));
 
-	*target_export = export_replacement;
+	*target_export = ExportHook;
 	return old_func_addr;
 }
 
@@ -101,14 +108,14 @@ void initilization(SDL_Window* window)
 {
 	// Setting hooks on export table(s)
 	const HMODULE hModule = GetModuleHandle(L"sdl2.dll");
-	SwapWindow = static_cast<SwapWindow_sig>(HookExport(hModule, "SDL_GL_SwapWindow", reinterpret_cast<DWORD>(DrawMenu)));
-	PollEvents = static_cast<PollEvents_sig>(HookExport(hModule, "SDL_PollEvent", reinterpret_cast<DWORD>(HandleEvent)));
+	SwapWindow = static_cast<SwapWindowSig>(HookExport(hModule, "SDL_GL_SwapWindow", reinterpret_cast<DWORD>(DrawMenu)));
+	PollEvents = static_cast<PollEventsSig>(HookExport(hModule, "SDL_PollEvent", reinterpret_cast<DWORD>(HandleEvent)));
 	
 	// Hooking the WndProc
-	SDL_SysWMinfo wm_info;
-	SDL_VERSION(&wm_info.version);
-	SDL_GetWindowWMInfo(window, &wm_info);
-	og_wndproc = reinterpret_cast<WndProc_sig>(SetWindowLongW(wm_info.info.win.window, GWLP_WNDPROC, reinterpret_cast<long>(WndProc)));
+	SDL_SysWMinfo wmInfo;
+	SDL_VERSION(&wmInfo.version);
+	SDL_GetWindowWMInfo(window, &wmInfo);
+	ogWndProc = reinterpret_cast<WndProcSig>(SetWindowLongW(wmInfo.info.win.window, GWLP_WNDPROC, reinterpret_cast<long>(WndProc)));
 
 	// Resolving addresses in memory via pattern scanning
 	ResolvePatterns();

@@ -165,7 +165,7 @@ namespace ImGui
 
 	ImVec4 GetColor(int original_color)
 	{
-		const auto& accent = cfg.menu_accent;
+		const auto& accent = cfg.MenuAccent;
 
 		switch (original_color)
 		{
