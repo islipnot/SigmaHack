@@ -12,7 +12,7 @@
 #define regular 0
 #define shotgun 1
 
-struct menu_cfg
+struct MenuCfg
 {
 	// Weapon
 	int TargetMode       = ClosestFOV;
@@ -63,4 +63,4 @@ struct menu_cfg
 	int vSpreadkey    = NULL;
 };
 
-extern menu_cfg cfg;
+extern MenuCfg cfg;

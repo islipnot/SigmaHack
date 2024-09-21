@@ -3,7 +3,7 @@
 #include "config.hpp"
 #include "weapon.hpp"
 
-menu_cfg cfg;
+MenuCfg cfg;
 WndProcSig ogWndProc;
 PollEventsSig PollEvents;
 
