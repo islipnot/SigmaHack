@@ -29,5 +29,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
         }
     }
 
+    std::cout << "\nInjection successful!\n";
     return true;
 }
