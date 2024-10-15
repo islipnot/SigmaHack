@@ -9,7 +9,7 @@
 - Open AssaultCube, and inject the compiled DLL into the process.
 - If you run into any errors, or you want to watch the progress, inject the debug build.
 
-## Screenshots
+# Screenshots
 
 ![BlankMenu](.github/BlankMenu.png)
 
