@@ -38,7 +38,7 @@ void DrawMenu(SDL_Window* window)
 
 		if (ImGui::BeginTabBar("Tabs"))
 		{
-			
+
 			if (ImGui::BeginTabItem("Weapon"))
 			{
 				ImGui::CheckboxEx("Aimbot", &cfg.aimbot);
