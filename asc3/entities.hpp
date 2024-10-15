@@ -1,3 +1,5 @@
+#pragma once
+
 struct weapon_info
 {
 	char weapon_name[23];      //0x0000
@@ -38,7 +40,7 @@ struct wpn_class
 	int scoped_since;           //0x002C
 };
 
-struct player_entity
+struct PlayerEnt
 {
 	char pad_0000[12];         //0x0000
 	float N00000052;           //0x000C
@@ -94,5 +96,5 @@ struct player_entity
 };
 
 extern UINT* PlayerCount;
-extern player_entity*** pPlayerList;
-extern player_entity* LocalPlayer;
+extern PlayerEnt*** pPlayerList;
+extern PlayerEnt* LocalPlayer;

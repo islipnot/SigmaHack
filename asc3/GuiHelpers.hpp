@@ -1,8 +1,10 @@
-#define dark_purple   0
-#define light_purple  1
-#define light_purpleA 2
-#define dark_grey     3
-#define menu_border   4
+#pragma once
+
+#define DarkPurple   0
+#define LightPurple  1
+#define LightPurpleA 2
+#define DarkGrey     3
+#define MenuBorder   4
 
 namespace ImGui
 {

@@ -21,7 +21,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h">
+    <ClInclude Include="pch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="gui.hpp">
@@ -333,7 +333,7 @@
     <ClInclude Include="entities.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gui_helpers.hpp">
+    <ClInclude Include="GuiHelpers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="config.hpp">
@@ -344,7 +344,7 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ptrn_scanning.cpp">
+    <ClCompile Include="pScanning.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="gui.cpp">
@@ -383,7 +383,7 @@
     <ClCompile Include="weapon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gui_helpers.cpp">
+    <ClCompile Include="GuiHelpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

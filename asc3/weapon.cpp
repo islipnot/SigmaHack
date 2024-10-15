@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "pch.hpp"
 #include "input.hpp"
 #include "weapon.hpp"
 #include "config.hpp"
@@ -6,10 +6,10 @@
 #include "pScanning.hpp"
 
 UINT* PlayerCount;
-player_entity*** pPlayerList;
-player_entity* LocalPlayer;
+PlayerEnt*** pPlayerList;
+PlayerEnt* LocalPlayer;
 
-float GetAngleDistance(const player_entity* self, float FinalYaw, float FinalPitch)
+float GetAngleDistance(const PlayerEnt* self, float FinalYaw, float FinalPitch)
 {
 	float YawDst = std::abs(self->yaw - FinalYaw);
 	float PitchDst = std::abs(self->pitch - FinalPitch);
@@ -20,7 +20,7 @@ float GetAngleDistance(const player_entity* self, float FinalYaw, float FinalPit
 	return sqrtf(powf(YawDst, 2.0f) + powf(PitchDst, 2.0f));
 }
 
-void GetAngleInfo(float& distance, float& yaw, float& pitch, const player_entity* self, const player_entity* target)
+void GetAngleInfo(float& distance, float& yaw, float& pitch, const PlayerEnt* self, const PlayerEnt* target)
 {
 	const float absX = self->x - target->x;
 	const float absY = self->y - target->y;
@@ -35,7 +35,7 @@ void GetAngleInfo(float& distance, float& yaw, float& pitch, const player_entity
 
 void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 {
-	player_entity** PlayerList = *pPlayerList;
+	PlayerEnt** PlayerList = *pPlayerList;
 
 	constexpr float MaxFloat = 18446744073709551615.0f;
 	float ClosestDst = MaxFloat;
@@ -46,7 +46,7 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 	float FinalYaw   = 0.0f;
 	float FinalPitch = 0.0f;
 
-	for (int x = 1; x < *PlayerCount; ++x)
+	for (UINT x = 1; x < *PlayerCount; ++x)
 	{
 		if (PlayerList[x]->health > 100 || (PlayerList[x]->team == LocalPlayer->team && !cfg.TargetTeam)) 
 			continue;
@@ -120,15 +120,16 @@ void aimbot() // NEEDS TO ADJUST TO CROUCHING PLAYERS
 	}
 }
 
-int SetSpread(int SpreadValue, const player_entity* PlayerEnt)
+int SetSpread(int SpreadValue, const PlayerEnt* PlayerEnt)
 {
 	if (PlayerEnt != LocalPlayer || !cfg.AdjustSpread) 
 		return SpreadValue;
 
-	if (PlayerEnt->equiped_wpn->weapon_id == shotgun_id) 
-		return SpreadValue * (cfg.ShotgunSpread / 100.0f);
-	else 
-		return SpreadValue * (cfg.RegSpread / 100.0f);
+	if (PlayerEnt->equiped_wpn->weapon_id == shotgun_id)
+	{
+		return SpreadValue * static_cast<int>(cfg.ShotgunSpread / 100.0f);
+	}
+	else return SpreadValue * static_cast<int>(cfg.RegSpread / 100.0f);
 }
 
 __declspec(naked) int SpreadDispatch()
@@ -151,8 +152,22 @@ void SetRecoil(float recoil)
 {
 	switch (cfg.RecoilMode)
 	{
-	case visual:   cfg.VisRecoil  = recoil; cfg.VisRecoilMulti = recoil / 1000.0f; break;
-	case physical: cfg.PhysRecoil = recoil; break;
-	default:       cfg.VisRecoil  = cfg.PhysRecoil = recoil;
+	case visual:
+	{
+		cfg.VisRecoil = recoil; 
+		cfg.VisRecoilMulti = recoil / 1000.0f; 
+		break;
+	}
+
+	case physical:
+	{
+		cfg.PhysRecoil = recoil;
+		break;
+	}
+
+	default:
+	{
+		cfg.VisRecoil = cfg.PhysRecoil = recoil;
+	}
 	}
 }

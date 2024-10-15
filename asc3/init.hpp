@@ -1,1 +1,3 @@
-void initilization(SDL_Window* window);
+#pragma once
+
+bool InitCheat(SDL_Window* const window);

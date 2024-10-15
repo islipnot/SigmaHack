@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "pch.hpp"
 #include "gui.hpp"
 #include "init.hpp"
 
@@ -16,8 +16,18 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
     #endif
 
         SDL_Window* window = InitGui();
-        initilization(window);
+        if (!window)
+        {
+            MessageBox(nullptr, L"GUI initialization failed", L"ERROR", MB_ICONERROR | MB_OK);
+            return false;
+        }
+
+        if (!InitCheat(window))
+        {
+            MessageBox(nullptr, L"Cheat initialization failed", L"ERROR", MB_ICONERROR | MB_OK);
+            return false;
+        }
     }
 
-    return TRUE;
+    return true;
 }

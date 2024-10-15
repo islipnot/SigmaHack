@@ -1,3 +1,7 @@
-#define unk 255 // unknown - in place of bytes that are subject to change
+#pragma once
 
-BYTE* ResolveAddress(const BYTE pattern[], int pattern_size, BYTE return_offset = 0, bool deref = true);
+#define unk 0xFFFF // unknown
+
+#define PtrnSz(pattern) sizeof(pattern) / sizeof(UINT16)
+
+BYTE* ResolveAddress(const UINT16* pattern, UINT pattern_size, int return_offset = 0, bool deref = true);

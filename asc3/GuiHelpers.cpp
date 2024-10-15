@@ -1,7 +1,7 @@
-#include "pch.h"
+#include "pch.hpp"
 #include "input.hpp"
 #include "config.hpp"
-#include "gui_helpers.hpp"
+#include "GuiHelpers.hpp"
 
 namespace ImGui
 {
@@ -22,9 +22,9 @@ namespace ImGui
 
 		if (v_status)
 		{
-			ImGui::PushStyleColor(ImGuiCol_FrameBg,        GetColor(dark_purple));
-			ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, GetColor(light_purple));
-			ImGui::PushStyleColor(ImGuiCol_FrameBgActive,  GetColor(light_purple));
+			ImGui::PushStyleColor(ImGuiCol_FrameBg,        GetColor(DarkPurple));
+			ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, GetColor(LightPurple));
+			ImGui::PushStyleColor(ImGuiCol_FrameBgActive,  GetColor(LightPurple));
 		}
 		else
 		{
@@ -119,7 +119,7 @@ namespace ImGui
 	{
 		ImGui::SameLine();
 
-		ImGui::TextColored(GetColor(light_purpleA), "?");
+		ImGui::TextColored(GetColor(LightPurpleA), "?");
 
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip(text);
 	}
@@ -169,47 +169,15 @@ namespace ImGui
 
 		switch (original_color)
 		{
+		case DarkPurple: return { accent[0], accent[1], accent[2], 0.75f };
 
-		case dark_purple:
-			return {
-				accent[0],
-				accent[1],
-				accent[2],
-				0.75f
-			};
+		case LightPurple: return { accent[0] + 0.1f, accent[1] + 0.01f, accent[2] + 0.1f, 0.75f };
 
-		case light_purple:
-			return {
-				accent[0] + 0.1f,
-				accent[1] + 0.01f,
-				accent[2] + 0.1f,
-				0.75f
-			};
+		case LightPurpleA: return { accent[0] + 0.6f, accent[1] + 0.51f, accent[2] + 0.6f, 0.75f };
 
-		case light_purpleA:
-			return {
-				accent[0] + 0.6f,
-				accent[1] + 0.51f,
-				accent[2] + 0.6f,
-				0.75f
-			};
+		case DarkGrey: return { accent[0] + -0.1554902f, accent[1] + 0.0484313f, accent[2] + -0.3084314f, 1.0f };
 
-		case dark_grey:
-			return {
-				accent[0] + -0.1554902f,
-				accent[1] + 0.0484313f,
-				accent[2] + -0.3084314f,
-				1.0f
-			};
-
-		default: // menu_border
-			return {
-				accent[0],
-				accent[1],
-				accent[2],
-				accent[3]
-			};
-
+		default: return { accent[0], accent[1], accent[2], accent[3] };
 		}
 
 		return {};

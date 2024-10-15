@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "pch.hpp"
 #include "input.hpp"
 #include "config.hpp"
 #include "weapon.hpp"

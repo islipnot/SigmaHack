@@ -1,11 +1,11 @@
-#include "pch.h"
+#include "pch.hpp"
 #include "gui.hpp"
 #include "input.hpp"
 #include "weapon.hpp"
 #include "config.hpp"
 #include "entities.hpp"
 #include "pScanning.hpp"
-#include "gui_helpers.hpp"
+#include "GuiHelpers.hpp"
 
 SwapWindowSig SwapWindow;
 
@@ -24,7 +24,7 @@ void SetupFrame()
 	ImGui::NewFrame();
 	ImGui::SetNextWindowSize({ 600, 450 }, ImGuiCond_FirstUseEver);
 
-	ImGui::PushStyleColor(ImGuiCol_Border, ImGui::GetColor(menu_border));
+	ImGui::PushStyleColor(ImGuiCol_Border, ImGui::GetColor(MenuBorder));
 
 	ImGui::Begin("sigmahack.cc", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings);
 	ImGui::PopStyleColor();
@@ -171,10 +171,10 @@ void DrawMenu(SDL_Window* window)
 				{
 					static auto& colors = ImGui::GetStyle().Colors;
 
-					colors[ImGuiCol_TabActive]        = ImGui::GetColor(light_purple);
-					colors[ImGuiCol_TabHovered]       = ImGui::GetColor(light_purpleA);
-					colors[ImGuiCol_SliderGrab]       = ImGui::GetColor(dark_purple);
-					colors[ImGuiCol_SliderGrabActive] = ImGui::GetColor(light_purple);
+					colors[ImGuiCol_TabActive]        = ImGui::GetColor(LightPurple);
+					colors[ImGuiCol_TabHovered]       = ImGui::GetColor(LightPurpleA);
+					colors[ImGuiCol_SliderGrab]       = ImGui::GetColor(DarkPurple);
+					colors[ImGuiCol_SliderGrabActive] = ImGui::GetColor(LightPurple);
 				}
 
 				ImGui::EndTabItem();
@@ -199,9 +199,24 @@ void DrawMenu(SDL_Window* window)
 SDL_Window* InitGui()
 {
 	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
 
-	constexpr BYTE window_pattern[] = 
+#ifdef _DEBUG
+
+	if (!ImGui::CreateContext())
+	{
+		std::cout << "ImGui::CreateContext failed\n";
+		return nullptr;
+	}
+	else std::cout << "ImGui::CreateContext success\n";
+
+#else
+
+	if (!ImGui::CreateContext())
+		return nullptr;
+
+#endif
+
+	constexpr UINT16 WindowPtrn[] = 
 	{
 		0x68, 0x00, 0x00, 0xFF, 0x1F,   // push 0x1FFF0000            (int y)
 		0x68, 0x00, 0x00, 0xFF, 0x1F,   // push 0x1FFF0000            (int x)
@@ -210,7 +225,7 @@ SDL_Window* InitGui()
 		0x8B, 0xC8,                     // mov ecx, eax               (eax = SDL_Window*)
 		0x83, 0xC4, 0x20                // add esp, 0x20
 	};
-	constexpr BYTE context_pattern[] =
+	constexpr UINT16 ContextPtrn[] =
 	{
 		0x51,                           // push ecx                       (ecx = SDL_Window*)
 		0xFF, 0x15, unk, unk, unk, unk, // call ds:SDL_GL_CreateContext   (__cdecl)
@@ -219,23 +234,77 @@ SDL_Window* InitGui()
 		0x85, 0xC0                      // test eax, eax
 	};
 	
-	const auto window_ptr = (SDL_Window**)ResolveAddress(window_pattern, sizeof(window_pattern), 28);
-	const auto context_ptr = (SDL_GLContext*)ResolveAddress(context_pattern, sizeof(context_pattern), 11);
+	const auto pWindow = reinterpret_cast<SDL_Window**>(ResolveAddress(WindowPtrn, PtrnSz(WindowPtrn), 28));
 
-	ImGui_ImplSDL2_InitForOpenGL(*window_ptr, *context_ptr);
-	ImGui_ImplOpenGL2_Init();
+#ifdef _DEBUG
+
+	if (!pWindow)
+	{
+		std::cout << "Failed to resolve WindowPtrn\n";
+		return nullptr;
+	}
+	else std::cout << "Resolved WindowPtrn\n";
+
+#else
+
+	if (!pWindow) return nullptr;
+
+#endif
+
+	const auto pContext = reinterpret_cast<SDL_GLContext*>(ResolveAddress(ContextPtrn, PtrnSz(ContextPtrn), 11));
+
+#ifdef _DEBUG
+
+	if (!pContext)
+	{
+		std::cout << "Failed to resolve ContextPtrn\n";
+		return nullptr;
+	}
+	else std::cout << "Resolved ContextPtrn\n";
+
+#else
+
+	if (!pContext) return nullptr;
+
+#endif
+
+#ifdef _DEBUG
+
+	if (!ImGui_ImplSDL2_InitForOpenGL(*pWindow, *pContext))
+	{
+		std::cout << "ImGui_ImplSDL2_InitForOpenGL failed\n";
+		return nullptr;
+	}
+	else std::cout << "ImGui_ImplSDL2_InitForOpenGL success\n";
+
+	if (!ImGui_ImplOpenGL2_Init())
+	{
+		std::cout << "ImGui_ImplOpenGL2_Init failed\n";
+		return nullptr;
+	}
+	else std::cout << "ImGui_ImplOpenGL2_Init success\n";
+
+#else
+
+	if (!ImGui_ImplSDL2_InitForOpenGL(*pWindow, *pContext))
+		return nullptr;
+
+	if (!ImGui_ImplOpenGL2_Init())
+		return nullptr;
+
+#endif
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	
 	constexpr ImVec4 clear          = { 0.0f, 0.0f, 0.0f, 0.0f };
 	constexpr ImVec4 black          = { 0.0f, 0.0f, 0.0f, 1.0f };
 	constexpr ImVec4 grey           = { 0.0901960f, 0.0901960f, 0.0901960f, 1.0f };
-	constexpr ImVec4 DarkGrey       = { 0.0601960f, 0.0601960f, 0.0601960f, 1.0f };
+	constexpr ImVec4 DarkGreyC      = { 0.0601960f, 0.0601960f, 0.0601960f, 1.0f };
 	constexpr ImVec4 LightGrey      = { 0.1562745f, 0.1562745f, 0.1562745f, 1.0f };
 	constexpr ImVec4 DarkGrey_Child = { 0.0501960f, 0.0501960f, 0.0501960f, 1.0f };
-	constexpr ImVec4 DarkPurple     = { 0.2156862f, 0.0117647f, 0.3686274f, 0.75f };
-	constexpr ImVec4 LightPurple    = { 0.3156862f, 0.0217647f, 0.4686274f, 0.75f };
-	constexpr ImVec4 LightPurple_2  = { 0.4156862f, 0.0317647f, 0.5686274f, 0.75f };
+	constexpr ImVec4 DarkPurpleC    = { 0.2156862f, 0.0117647f, 0.3686274f, 0.75f };
+	constexpr ImVec4 LightPurpleC   = { 0.3156862f, 0.0217647f, 0.4686274f, 0.75f };
+	constexpr ImVec4 LightPurple2   = { 0.4156862f, 0.0317647f, 0.5686274f, 0.75f };
 
 	style.TabRounding     = 0.0f;
 	style.FrameBorderSize = 1.0f;
@@ -246,24 +315,24 @@ SDL_Window* InitGui()
 	style.Colors[ImGuiCol_TitleBgActive]     = black;
 	style.Colors[ImGuiCol_TitleBg]           = black;
 	style.Colors[ImGuiCol_WindowBg]          = grey;
-	style.Colors[ImGuiCol_Button]            = DarkGrey;
+	style.Colors[ImGuiCol_Button]            = DarkGreyC;
 	style.Colors[ImGuiCol_ButtonActive]      = LightGrey;
 	style.Colors[ImGuiCol_ButtonHovered]     = LightGrey;
-	style.Colors[ImGuiCol_PopupBg]           = DarkGrey;
-	style.Colors[ImGuiCol_Header]            = DarkGrey;
+	style.Colors[ImGuiCol_PopupBg]           = DarkGreyC;
+	style.Colors[ImGuiCol_Header]            = DarkGreyC;
 	style.Colors[ImGuiCol_HeaderActive]      = LightGrey;
 	style.Colors[ImGuiCol_HeaderHovered]     = LightGrey;
-	style.Colors[ImGuiCol_FrameBg]           = DarkGrey;
+	style.Colors[ImGuiCol_FrameBg]           = DarkGreyC;
 	style.Colors[ImGuiCol_FrameBgHovered]    = LightGrey;
 	style.Colors[ImGuiCol_FrameBgActive]     = LightGrey;
 	style.Colors[ImGuiCol_ChildBg]           = DarkGrey_Child;
 	style.Colors[ImGuiCol_CheckMark]         = black;
-	style.Colors[ImGuiCol_Tab]               = DarkGrey;
-	style.Colors[ImGuiCol_TabActive]         = LightPurple;
-	style.Colors[ImGuiCol_TabHovered]        = LightPurple_2;
-	style.Colors[ImGuiCol_SliderGrab]        = DarkPurple;
-	style.Colors[ImGuiCol_SliderGrabActive]  = LightPurple;
-	style.Colors[ImGuiCol_Separator]         = DarkGrey;
+	style.Colors[ImGuiCol_Tab]               = DarkGreyC;
+	style.Colors[ImGuiCol_TabActive]         = LightPurpleC;
+	style.Colors[ImGuiCol_TabHovered]        = LightPurple2;
+	style.Colors[ImGuiCol_SliderGrab]        = DarkPurpleC;
+	style.Colors[ImGuiCol_SliderGrabActive]  = LightPurpleC;
+	style.Colors[ImGuiCol_Separator]         = DarkGreyC;
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigWindowsResizeFromEdges = false;
@@ -271,5 +340,5 @@ SDL_Window* InitGui()
 	io.Fonts->AddFontFromFileTTF("c:\\Aileron.ttf", 16);
 	io.FontDefault = io.Fonts->Fonts[0];
 
-	return *window_ptr;
+	return *pWindow;
 }
