@@ -200,99 +200,62 @@ SDL_Window* InitGui()
 {
 	IMGUI_CHECKVERSION();
 
-#ifdef _DEBUG
-
 	if (!ImGui::CreateContext())
 	{
-		std::cout << "ImGui::CreateContext failed\n";
+		EDBG_OUT("ImGui::CreateContext failed\n");
 		return nullptr;
 	}
-	else std::cout << "ImGui::CreateContext success\n";
-
-#else
-
-	if (!ImGui::CreateContext())
-		return nullptr;
-
-#endif
+	DBG_ELSE_OUT("ImGui::CreateContext success\n");
 
 	constexpr UINT16 WindowPtrn[] = 
 	{
-		0x68, 0x00, 0x00, 0xFF, 0x1F,   // push 0x1FFF0000            (int y)
-		0x68, 0x00, 0x00, 0xFF, 0x1F,   // push 0x1FFF0000            (int x)
-		0x68, unk, unk, unk, unk,       // push "AssaultCube"         (const char* title)
-		0xFF, 0x15, unk, unk, unk, unk, // call ds:SDL_CreateWindow   (__cdecl)
-		0x8B, 0xC8,                     // mov ecx, eax               (eax = SDL_Window*)
+		0x68, 0x00, 0x00, 0xFF, 0x1F,   // push 0x1FFF0000    ; int y
+		0x68, 0x00, 0x00, 0xFF, 0x1F,   // push 0x1FFF0000    ; int x
+		0x68, unk, unk, unk, unk,       // push "AssaultCube" ; const char* title
+		0xFF, 0x15, unk, unk, unk, unk, // call ds:SDL_CreateWindow
+		0x8B, 0xC8,                     // mov ecx, eax       ; eax = SDL_Window*
 		0x83, 0xC4, 0x20                // add esp, 0x20
 	};
 	constexpr UINT16 ContextPtrn[] =
 	{
-		0x51,                           // push ecx                       (ecx = SDL_Window*)
-		0xFF, 0x15, unk, unk, unk, unk, // call ds:SDL_GL_CreateContext   (__cdecl)
+		0x51,                           // push ecx ; ecx = SDL_Window*
+		0xFF, 0x15, unk, unk, unk, unk, // call ds:SDL_GL_CreateContext
 		0x83, 0xC4, 0x04,               // add esp, 4
-		0xA3, unk, unk, unk, unk,       // mov SDL_GLContext, eax         (eax = SDL_GLContext*)
+		0xA3, unk, unk, unk, unk,       // mov SDL_GLContext, eax ; eax = SDL_GLContext*
 		0x85, 0xC0                      // test eax, eax
 	};
 	
-	const auto pWindow = reinterpret_cast<SDL_Window**>(ResolveAddress(WindowPtrn, PtrnSz(WindowPtrn), 28));
-
-#ifdef _DEBUG
+	const auto pWindow = ResolveAddressEx<SDL_Window**>(WindowPtrn, PtrnSz(WindowPtrn), 28);
 
 	if (!pWindow)
 	{
-		std::cout << "Failed to resolve WindowPtrn\n";
+		EDBG_OUT("Failed to resolve WindowPtrn\n");
 		return nullptr;
 	}
-	else std::cout << "Resolved WindowPtrn\n";
+	DBG_ELSE_OUT("Resolved WindowPtrn\n");
 
-#else
-
-	if (!pWindow) return nullptr;
-
-#endif
-
-	const auto pContext = reinterpret_cast<SDL_GLContext*>(ResolveAddress(ContextPtrn, PtrnSz(ContextPtrn), 11));
-
-#ifdef _DEBUG
+	const auto pContext = ResolveAddressEx<SDL_GLContext*>(ContextPtrn, PtrnSz(ContextPtrn), 11);
 
 	if (!pContext)
 	{
-		std::cout << "Failed to resolve ContextPtrn\n";
+		EDBG_OUT("Failed to resolve ContextPtrn\n");
 		return nullptr;
 	}
-	else std::cout << "Resolved ContextPtrn\n";
-
-#else
-
-	if (!pContext) return nullptr;
-
-#endif
-
-#ifdef _DEBUG
+	DBG_ELSE_OUT("Resolved ContextPtrn\n");
 
 	if (!ImGui_ImplSDL2_InitForOpenGL(*pWindow, *pContext))
 	{
-		std::cout << "ImGui_ImplSDL2_InitForOpenGL failed\n";
+		EDBG_OUT("ImGui_ImplSDL2_InitForOpenGL failed\n");
 		return nullptr;
 	}
-	else std::cout << "ImGui_ImplSDL2_InitForOpenGL success\n";
+	DBG_ELSE_OUT("ImGui_ImplSDL2_InitForOpenGL success\n");
 
 	if (!ImGui_ImplOpenGL2_Init())
 	{
-		std::cout << "ImGui_ImplOpenGL2_Init failed\n";
+		EDBG_OUT("ImGui_ImplOpenGL2_Init failed\n");
 		return nullptr;
 	}
-	else std::cout << "ImGui_ImplOpenGL2_Init success\n";
-
-#else
-
-	if (!ImGui_ImplSDL2_InitForOpenGL(*pWindow, *pContext))
-		return nullptr;
-
-	if (!ImGui_ImplOpenGL2_Init())
-		return nullptr;
-
-#endif
+	DBG_ELSE_OUT("ImGui_ImplOpenGL2_Init success\n");
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	
@@ -339,6 +302,6 @@ SDL_Window* InitGui()
 
 	io.Fonts->AddFontFromFileTTF("c:\\Aileron.ttf", 16);
 	io.FontDefault = io.Fonts->Fonts[0];
-
+	
 	return *pWindow;
 }

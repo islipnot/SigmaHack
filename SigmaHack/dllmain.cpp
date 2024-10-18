@@ -10,9 +10,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
     if (fdwReason == DLL_PROCESS_ATTACH)
     {
     #ifdef _DEBUG
+
         AllocConsole();
         FILE* fp;
         freopen_s(&fp, "CONOUT$", "w", stdout);
+
     #endif
 
         SDL_Window* window = InitGui();
@@ -27,8 +29,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
             MessageBox(nullptr, L"Cheat initialization failed", L"ERROR", MB_ICONERROR | MB_OK);
             return false;
         }
-    }
 
-    std::cout << "\nInjection successful!\n";
+        DBG_OUT("\nInjection successful!\n");
+    }
+    
     return true;
 }

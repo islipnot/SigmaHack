@@ -1,14 +1,27 @@
 #pragma once
 
+#ifdef _DEBUG
+
+	#include <iostream>
+
+	#define DBG_OUT(output) std::cout << output
+	#define EDBG_OUT(error) std::cerr << error
+
+	#define DBG_ELSE_OUT(output) else std::cout << output
+
+#else
+
+	#define DBG_OUT(output)
+	#define EDBG_OUT(error)
+
+	#define DBG_ELSE_OUT(output)
+
+#endif
+
 #define WIN32_LEAN_AND_MEAN
 
 #include <windows.h>
 #include <Psapi.h>
-
-#ifdef _DEBUG
-	#include <iostream>
-#endif
-
 #include <string>
 
 // Suppressing unneeded warnings from included libs

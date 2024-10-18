@@ -1,34 +1,35 @@
 #include "pch.hpp"
 #include "pScanning.hpp"
 
-BYTE* ResolveAddress(const UINT16* pattern, UINT PatternSz, int RetOffset, bool deref)
+BYTE* ResolveAddress(const UINT16* const pattern, const UINT PatternSz, const int RetOffset)
 {
 	static HMODULE hModule = GetModuleHandle(L"ac_client.exe");
-	static MODULEINFO ModuleInfo{ NULL };
+	static MODULEINFO ModuleInfo{ nullptr };
 
 	if (!ModuleInfo.lpBaseOfDll) GetModuleInformation(GetCurrentProcess(), hModule, &ModuleInfo, sizeof(MODULEINFO));
 
-	BYTE* data = static_cast<BYTE*>(ModuleInfo.lpBaseOfDll);
-	const BYTE* ScanEnd = (data + ModuleInfo.SizeOfImage) - PatternSz;
+	BYTE* base = static_cast<BYTE*>(ModuleInfo.lpBaseOfDll);
 
-	while (data < ScanEnd)
+	for (const BYTE* end = (base + ModuleInfo.SizeOfImage) - PatternSz; base < end; ++base)
 	{
 		UINT MatchingBytes = 0;
 
-		for (UINT i = 0; i < PatternSz; ++i, ++data, ++MatchingBytes)
+		for (UINT i = 0; i < PatternSz; ++i, ++base, ++MatchingBytes)
 		{
-			if (pattern[i] == unk) continue;
-			if (static_cast<BYTE>(pattern[i]) != *data) break;
+			if (!(pattern[i] & unk) && static_cast<BYTE>(pattern[i]) != *base)
+				break;
 		}
 
 		if (MatchingBytes == PatternSz)
 		{
-			BYTE* const ResolvedAddress = (data - MatchingBytes) + RetOffset;
-			return deref ? *reinterpret_cast<BYTE**>(ResolvedAddress) : ResolvedAddress;
+			return (base - MatchingBytes) + RetOffset;
 		}
-
-		++data;
 	}
 
 	return nullptr; 
+}
+
+void* ResolveAndDerefAddress(const UINT16* const pattern, const UINT PatternSz, const int RetOffset)
+{
+	return *reinterpret_cast<void**>(ResolveAddress(pattern, PatternSz, RetOffset));
 }
