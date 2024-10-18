@@ -1,10 +1,10 @@
 #include "pch.hpp"
 #include "gui.hpp"
+#include "init.hpp"
 #include "input.hpp"
 #include "weapon.hpp"
 #include "config.hpp"
 #include "entities.hpp"
-#include "pScanning.hpp"
 #include "GuiHelpers.hpp"
 
 SwapWindowSig SwapWindow;

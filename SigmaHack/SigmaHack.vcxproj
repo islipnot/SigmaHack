@@ -264,7 +264,6 @@
     <ClInclude Include="libraries\include\SDL\SDL_video.h" />
     <ClInclude Include="libraries\include\SDL\SDL_vulkan.h" />
     <ClInclude Include="pch.hpp" />
-    <ClInclude Include="pScanning.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GuiHelpers.cpp">
@@ -302,12 +301,6 @@
     <ClCompile Include="libraries\include\Imgui\imgui_impl_sdl2.cpp" />
     <ClCompile Include="libraries\include\Imgui\imgui_tables.cpp" />
     <ClCompile Include="libraries\include\Imgui\imgui_widgets.cpp" />
-    <ClCompile Include="pScanning.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">pch.hpp</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">pch.hpp</PrecompiledHeaderFile>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

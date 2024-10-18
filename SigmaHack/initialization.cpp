@@ -1,5 +1,3 @@
-#pragma warning(disable : 6387)
-
 #include "pch.hpp"
 #include "gui.hpp"
 #include "init.hpp"
@@ -7,19 +5,18 @@
 #include "weapon.hpp"
 #include "config.hpp"
 #include "entities.hpp"
-#include "pScanning.hpp"
 
 extern WndProcSig ogWndProc;
 extern PollEventsSig PollEvents;
 extern SwapWindowSig SwapWindow;
 
-BOOL VirtualProtectERW(void* address, int sz)
+BOOL VirtualProtectERW(void* address, const int sz)
 {
 	DWORD old;
 	return VirtualProtect(address, sz, PAGE_EXECUTE_READWRITE, &old);
 }
 
-bool SetHook(BYTE* pHook, const BYTE* dst, int ExtraBytes = 0)
+bool SetHook(BYTE* pHook, const BYTE* dst, const int ExtraBytes = 0)
 {
 	if (!VirtualProtectERW(pHook, 5 + ExtraBytes))
 	{
@@ -28,11 +25,39 @@ bool SetHook(BYTE* pHook, const BYTE* dst, int ExtraBytes = 0)
 	}
 	DBG_ELSE_OUT("pHook protection set\n");
 
-	*pHook = 0xE8; // 0xE8 = call
+	*pHook = 0xE8; // 0xE8 == call
 	*reinterpret_cast<DWORD*>(pHook + 1) = dst - (pHook + 5);
 	
 	if (ExtraBytes) memset(pHook + 5, 0x90, ExtraBytes); // NOP'ing specified bytes
 	return true;
+}
+
+BYTE* ResolveAddress(const UINT16* const pattern, const UINT PatternSz, const int RetOffset)
+{
+	static HMODULE hModule = GetModuleHandle(L"ac_client.exe");
+	static MODULEINFO ModuleInfo{ nullptr };
+
+	if (!ModuleInfo.lpBaseOfDll) GetModuleInformation(GetCurrentProcess(), hModule, &ModuleInfo, sizeof(MODULEINFO));
+
+	BYTE* base = static_cast<BYTE*>(ModuleInfo.lpBaseOfDll);
+
+	for (const BYTE* end = (base + ModuleInfo.SizeOfImage) - PatternSz; base < end; ++base)
+	{
+		UINT MatchingBytes = 0;
+
+		for (UINT i = 0; i < PatternSz; ++i, ++base, ++MatchingBytes)
+		{
+			if (!(pattern[i] & unk) && static_cast<BYTE>(pattern[i]) != *base)
+				break;
+		}
+
+		if (MatchingBytes == PatternSz)
+		{
+			return (base - MatchingBytes) + RetOffset;
+		}
+	}
+
+	return nullptr;
 }
 
 bool ResolvePatterns()
@@ -72,18 +97,18 @@ bool ResolvePatterns()
 
 	// Getting entity pointers
 
-	const auto pEntList = ResolveAddressEx<PlayerEnt***>(EntListPattern, PtrnSz(EntListPattern), 1);
+	void* ResolvedAddress = ResolveAddressEx(EntListPattern, PtrnSz(EntListPattern), 1);
 
-	if (!pEntList)
+	if (!ResolvedAddress)
 	{
 		EDBG_OUT("Failed to resolve EntListPattern\n");
 		return false;
 	}
 	DBG_ELSE_OUT("Resolved EntListPattern\n");
 
-	pPlayerList = pEntList;
-	PlayerCount = reinterpret_cast<UINT*>(pEntList + 2);
-	LocalPlayer = *reinterpret_cast<PlayerEnt**>(pEntList - 1); 
+	pPlayerList = static_cast<PlayerEnt***>(ResolvedAddress);
+	PlayerCount = static_cast<UINT*>(ResolvedAddress) + 2;
+	LocalPlayer = *static_cast<PlayerEnt**>(ResolvedAddress) - 1; 
 
 	// Getting FOV pointer
 
@@ -100,54 +125,52 @@ bool ResolvePatterns()
 
 	// Getting roll patch address
 
-	BYTE* const pRoll = ResolveAddress(RollPattern, PtrnSz(RollPattern));
+	ResolvedAddress = ResolveAddress(RollPattern, PtrnSz(RollPattern));
 
-	if (!pRoll)
+	if (!ResolvedAddress)
 	{
 		EDBG_OUT("Failed to resolve RollPattern\n");
 		return false;
 	}
 	DBG_ELSE_OUT("Resolved RollPattern\n");
 
-	VirtualProtectERW(pRoll, 5);
-	memset(pRoll, 0x90, 5);
+	VirtualProtectERW(ResolvedAddress, 5);
+	memset(ResolvedAddress, 0x90, 5);
 
 	// Hooking the address at which spread is determined
 
-	BYTE* const pSpread = ResolveAddress(SpreadPattern, PtrnSz(SpreadPattern));
+	ResolvedAddress = ResolveAddress(SpreadPattern, PtrnSz(SpreadPattern));
 
-	if (!pSpread)
+	if (!ResolvedAddress)
 	{
 		EDBG_OUT("Failed to resolve SpreadPattern\n");
 		return false;
 	}
 	DBG_ELSE_OUT("Resolved SpreadPattern\n");
 
-	SetHook(pSpread, reinterpret_cast<BYTE*>(SpreadDispatch), 0);
+	SetHook(static_cast<BYTE*>(ResolvedAddress), reinterpret_cast<BYTE*>(SpreadDispatch), 0);
 
 	// Locating the address at which the visual recoil multiplier is to be copied
 	
-	BYTE* const pVisRecoilPatch = ResolveAddress(vRecoilPattern, PtrnSz(vRecoilPattern), 4);
+	ResolvedAddress = ResolveAddress(vRecoilPattern, PtrnSz(vRecoilPattern), 4);
 
-	if (!pVisRecoilPatch)
+	if (!ResolvedAddress)
 	{
 		EDBG_OUT("Failed to resolve vRecoilPattern\n");
 		return false;
 	}
 	DBG_ELSE_OUT("Resolved vRecoilPattern\n");
 
-	VirtualProtectERW(pVisRecoilPatch, 4);
-
-	float* pVisRecoil = &cfg.VisRecoilMulti;
-	memcpy(pVisRecoil, &pVisRecoil, sizeof(float*));
+	VirtualProtectERW(ResolvedAddress, sizeof(float*));
+	*static_cast<float**>(ResolvedAddress) = &cfg.VisRecoilMulti;
 
 	return true;
 }
 
-void* HookExport(HMODULE hModule, const char* fnName, DWORD ExportHook)
+void* HookExport(HMODULE hModule, const char* fnName, const DWORD_PTR ExportHook)
 {
-	DWORD* TargetExport = *reinterpret_cast<DWORD**>((reinterpret_cast<BYTE*>(GetProcAddress(hModule, fnName)) + 2));
-	DWORD* pOldFunc = *reinterpret_cast<DWORD**>(TargetExport);
+	DWORD* TargetExport = *reinterpret_cast<DWORD**>(reinterpret_cast<BYTE*>(GetProcAddress(hModule, fnName)) + 2);
+	DWORD* OldExport = *reinterpret_cast<DWORD**>(TargetExport);
 
 	if (!VirtualProtectERW(TargetExport, sizeof(DWORD*)))
 	{
@@ -157,15 +180,15 @@ void* HookExport(HMODULE hModule, const char* fnName, DWORD ExportHook)
 	DBG_ELSE_OUT("TargetExport protection set!\n");
 
 	*TargetExport = ExportHook;
-	return pOldFunc;
+	return OldExport;
 }
 
-bool InitCheat(SDL_Window* const window)
+bool InitCheat(SDL_Window* window)
 {
 	// Setting hooks on export table(s)
-	const HMODULE hModule = GetModuleHandle(L"sdl2.dll");
+	const HMODULE hSdl = GetModuleHandle(L"sdl2.dll");
 
-	SwapWindow = static_cast<SwapWindowSig>(HookExport(hModule, "SDL_GL_SwapWindow", reinterpret_cast<DWORD>(DrawMenu)));
+	SwapWindow = static_cast<SwapWindowSig>(HookExport(hSdl, "SDL_GL_SwapWindow", reinterpret_cast<DWORD>(DrawMenu)));
 
 	if (!static_cast<void*>(SwapWindow))
 	{
@@ -174,7 +197,7 @@ bool InitCheat(SDL_Window* const window)
 	}
 	DBG_ELSE_OUT("Hooked SDL_GL_SwapWindow\n");
 
-	PollEvents = static_cast<PollEventsSig>(HookExport(hModule, "SDL_PollEvent", reinterpret_cast<DWORD>(HandleEvent)));
+	PollEvents = static_cast<PollEventsSig>(HookExport(hSdl, "SDL_PollEvent", reinterpret_cast<DWORD>(HandleEvent)));
 
 	if (!static_cast<void*>(PollEvents))
 	{

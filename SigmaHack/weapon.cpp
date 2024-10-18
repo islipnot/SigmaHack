@@ -3,7 +3,6 @@
 #include "weapon.hpp"
 #include "config.hpp"
 #include "entities.hpp"
-#include "pScanning.hpp"
 
 UINT* PlayerCount;
 PlayerEnt*** pPlayerList;
@@ -132,7 +131,7 @@ int SetSpread(int SpreadValue, const PlayerEnt* PlayerEnt)
 	else return SpreadValue * static_cast<int>(cfg.RegSpread / 100.0f);
 }
 
-__declspec(naked) int SpreadDispatch()
+__declspec(naked) int __cdecl SpreadDispatch()
 {
 	__asm
 	{
@@ -165,9 +164,7 @@ void SetRecoil(float recoil)
 		break;
 	}
 
-	default:
-	{
-		cfg.VisRecoil = cfg.PhysRecoil = recoil;
-	}
+	default: cfg.VisRecoil = cfg.PhysRecoil = recoil;
+	
 	}
 }

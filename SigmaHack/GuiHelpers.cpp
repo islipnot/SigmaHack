@@ -40,7 +40,7 @@ namespace ImGui
 		return status;
 	}
 
-	bool SliderFloatEx(const char* label, float* var, float min, float max)
+	bool SliderFloatEx(const char* label, float* var, const float min, const float max)
 	{
 		static const auto& style = ImGui::GetStyle();
 
@@ -137,7 +137,7 @@ namespace ImGui
 		return status;
 	}
 
-	void Hotkey(char buffer[2], int* vBuffer, int ID)
+	void Hotkey(char buffer[2], int* vBuffer, const int ID)
 	{
 		ImGui::SameLine();
 		ImGui::Text("-->");
@@ -163,21 +163,21 @@ namespace ImGui
 		ImGui::Description("hotkey");
 	}
 
-	ImVec4 GetColor(int original_color)
+	ImVec4 GetColor(const int OgColor)
 	{
 		const auto& accent = cfg.MenuAccent;
 
-		switch (original_color)
+		switch (OgColor)
 		{
-		case DarkPurple: return { accent[0], accent[1], accent[2], 0.75f };
+		case DarkPurple:   return { accent[0], accent[1], accent[2], 0.75f };
 
-		case LightPurple: return { accent[0] + 0.1f, accent[1] + 0.01f, accent[2] + 0.1f, 0.75f };
+		case LightPurple:  return { accent[0] + 0.1f, accent[1] + 0.01f, accent[2] + 0.1f, 0.75f };
 
 		case LightPurpleA: return { accent[0] + 0.6f, accent[1] + 0.51f, accent[2] + 0.6f, 0.75f };
 
-		case DarkGrey: return { accent[0] + -0.1554902f, accent[1] + 0.0484313f, accent[2] + -0.3084314f, 1.0f };
+		case DarkGrey:     return { accent[0] + -0.1554902f, accent[1] + 0.0484313f, accent[2] + -0.3084314f, 1.0f };
 
-		default: return { accent[0], accent[1], accent[2], accent[3] };
+		default:           return { accent[0], accent[1], accent[2], accent[3] };
 		}
 
 		return {};

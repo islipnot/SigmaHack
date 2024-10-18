@@ -27,9 +27,6 @@
     <ClInclude Include="gui.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pScanning.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="libraries\include\SDL\begin_code.h">
       <Filter>Header Files\libs</Filter>
     </ClInclude>
@@ -342,9 +339,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pScanning.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="gui.cpp">
