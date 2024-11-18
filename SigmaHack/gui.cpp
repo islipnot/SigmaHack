@@ -211,7 +211,7 @@ SDL_Window* InitGui()
 	{
 		0x68, 0x00, 0x00, 0xFF, 0x1F,   // push 0x1FFF0000    ; int y
 		0x68, 0x00, 0x00, 0xFF, 0x1F,   // push 0x1FFF0000    ; int x
-		0x68, unk, unk, unk, unk,       // push "AssaultCube" ; const char* title
+		0x68, unk,  unk, unk, unk,      // push "AssaultCube" ; const char* title
 		0xFF, 0x15, unk, unk, unk, unk, // call ds:SDL_CreateWindow
 		0x8B, 0xC8,                     // mov ecx, eax       ; eax = SDL_Window*
 		0x83, 0xC4, 0x20                // add esp, 0x20

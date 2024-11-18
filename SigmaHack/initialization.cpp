@@ -108,7 +108,7 @@ bool ResolvePatterns()
 
 	pPlayerList = static_cast<PlayerEnt***>(ResolvedAddress);
 	PlayerCount = static_cast<UINT*>(ResolvedAddress) + 2;
-	LocalPlayer = *static_cast<PlayerEnt**>(ResolvedAddress) - 1; 
+	LocalPlayer = *(static_cast<PlayerEnt**>(ResolvedAddress) - 1); 
 
 	// Getting FOV pointer
 
@@ -177,7 +177,7 @@ void* HookExport(HMODULE hModule, const char* fnName, const DWORD_PTR ExportHook
 		EDBG_OUT("Failed to set protection on TargetExport! (" << GetLastError << ")\n");
 		return nullptr;
 	}
-	DBG_ELSE_OUT("TargetExport protection set!\n");
+	DBG_ELSE_OUT("TargetExport protection set\n");
 
 	*TargetExport = ExportHook;
 	return OldExport;
