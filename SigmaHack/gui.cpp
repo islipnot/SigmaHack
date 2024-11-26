@@ -300,8 +300,8 @@ SDL_Window* InitGui()
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigWindowsResizeFromEdges = false;
 
-	io.Fonts->AddFontFromFileTTF("c:\\Aileron.ttf", 16);
-	io.FontDefault = io.Fonts->Fonts[0];
+	// io.Fonts->AddFontFromFileTTF("c:\\Aileron.ttf", 16);
+	// io.FontDefault = io.Fonts->Fonts[0];
 	
 	return *pWindow;
 }
