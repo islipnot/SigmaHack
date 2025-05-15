@@ -1,9 +1,5 @@
-# SigmaHack.cc internal
-
-- An internal cheat for assault cube.
-- All features of this cheat work in online.
-- Does not give advantages to bots in offline.
-- Game source not used, everything is reverse engineered.
+# SigmaHack
+An internal cheat for assault cube. All features of this cheat work in online, and advantages are not given to bots in offline. I personally did not refer to the source code while working on this project as a way to ensure I learned from it and improved at RE.
 
 # Usage
 
